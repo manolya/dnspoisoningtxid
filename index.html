@@ -273,6 +273,80 @@ em{color:var(--cyan);font-style:normal;font-weight:700}
 .isrc{margin-top:6px;font-size:13px}
 @media (max-width:560px){.mini li::after{display:none}}
 
+/* table of contents */
+.toc{padding:18px 22px 20px}
+.toc ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:4px 18px}
+.toc li{margin:0;padding:0}
+.toc a{display:flex;gap:12px;align-items:baseline;text-decoration:none;color:var(--cream);padding:8px 6px;border-bottom:1px solid var(--line)}
+.toc a:hover{color:var(--gold)}
+.toc a .n{font-family:var(--f-term);color:var(--pink);font-size:17px;min-width:34px}
+.toc a .tt{min-width:0}
+.toc a .tt b{display:block;color:#fff;font-weight:700;font-size:15px}
+.toc a .tt span{font-size:12.8px;color:var(--cream-dim)}
+.toctools{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.toctools a{font-family:var(--f-term);font-size:14.5px;color:var(--cyan);text-decoration:none;border:1.5px solid var(--line);border-radius:999px;padding:4px 12px}
+.toctools a:hover{border-color:var(--cyan)}
+.toctools a::before{content:"◈ "}
+
+/* incident dashboard */
+.dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:8px 0 16px}
+.dtile{background:linear-gradient(180deg,rgba(255,126,200,.14),rgba(110,233,242,.08));border:2px solid var(--line);border-radius:16px;padding:14px;text-align:center}
+.dtile .n{font-family:var(--f-term);font-size:28px;color:var(--gold);line-height:1}
+.dtile .c{font-size:12.3px;color:var(--cream-dim);margin-top:5px}
+.matrix{width:100%;border-collapse:separate;border-spacing:0;font-size:13.6px;border:2px solid var(--line);border-radius:14px;overflow:hidden;min-width:620px}
+.matrix th,.matrix td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.matrix th{font-family:var(--f-disp);background:rgba(255,126,200,.14);color:#fff;font-size:12.3px}
+.matrix tr:last-child td{border-bottom:0}
+.matrix td:first-child{font-family:var(--f-term);font-size:15px}
+.matrix td:first-child a{color:var(--gold);text-decoration:none}
+.matrix td:first-child a:hover{text-decoration:underline}
+.cvssbar{display:flex;align-items:center;gap:8px;min-width:110px}
+.cvssbar .track{flex:1;height:8px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden;min-width:50px}
+.cvssbar .fill{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--ruby))}
+.cvssbar .val{font-family:var(--f-term);font-size:14px;color:var(--cream)}
+.matrix .yes{color:var(--cyan);font-weight:700;white-space:nowrap}
+
+/* threat model attack tree */
+.tree{margin:8px 0 2px;font-size:14.5px}
+.tree ul{list-style:none;margin:0;padding:0 0 0 24px}
+.tree>ul{padding-left:0}
+.tree li{position:relative;margin:7px 0}
+.tree ul ul{border-left:2px dashed var(--line);margin-left:10px}
+.tree ul ul>li{padding-left:4px}
+.node{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;border:2px solid var(--line);border-radius:12px;padding:7px 12px;background:rgba(32,17,78,.6);max-width:100%}
+.node .lbl{color:#fff;font-weight:700}
+.node .sub{font-size:12.6px;color:var(--cream-dim)}
+.node.goal{border-color:var(--pink);background:rgba(255,126,200,.12)}
+.node.op{font-family:var(--f-term);letter-spacing:.06em;color:var(--gold);border-color:var(--gold);padding:4px 10px;margin-right:4px}
+.node.or1{border-color:var(--cyan)}
+.node.or2{border-color:var(--violet)}
+.node.gate{border-color:var(--gold);background:rgba(255,216,77,.1)}
+.androw{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.cvetag{font-family:var(--f-term);font-size:12.8px;padding:0 8px;border-radius:999px;border:1.5px solid currentColor;white-space:nowrap}
+.ct1{color:var(--cyan)} .ct2{color:var(--violet)}
+.gatewrap{text-align:center;margin:8px 0 2px}
+.gatewrap .arr{color:var(--gold);font-size:18px;display:block;margin-bottom:6px}
+.treelegend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px;font-size:12.8px;color:var(--cream-dim)}
+.treelegend span{display:inline-flex;align-items:center;gap:6px}
+.treelegend .sw{width:14px;height:14px;border-radius:4px;border:2px solid;flex:none}
+
+/* per-CVE steps + flow diagram */
+.cvebody{display:flex;flex-direction:column;gap:12px;margin:12px 0 2px}
+.steps{margin:0;padding:0;list-style:none;counter-reset:st;display:flex;flex-direction:column;gap:7px}
+.steps li{position:relative;padding-left:36px;font-size:14.3px;min-width:0;margin:0}
+.steps li::before{counter-increment:st;content:counter(st);position:absolute;left:0;top:-1px;width:25px;height:25px;border-radius:50%;background:var(--panel2);border:2px solid var(--pink);color:var(--pink);font-family:var(--f-term);font-size:16px;display:grid;place-items:center}
+.steps li b{color:#fff}
+.flowdiag{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:2px 0}
+.fbox{flex:1;min-width:150px;border:2px solid var(--line);border-radius:12px;padding:9px 12px;background:rgba(32,17,78,.55);display:flex;flex-direction:column;justify-content:center}
+.fbox .ft{font-weight:700;color:#fff;font-size:13.8px}
+.fbox .fs{font-size:12.3px;color:var(--cream-dim);margin-top:2px}
+.fbox .tagfail{font-family:var(--f-term);font-size:12.5px;color:var(--ruby);margin-top:5px}
+.fbox.fail{border-color:var(--ruby);background:rgba(255,85,119,.12)}
+.fbox.fail .ft{color:#ffd3dc}
+.fbox.win{border-color:var(--cyan)}
+.farrow{align-self:center;color:var(--pink);font-size:20px;flex:0 0 auto}
+@media (max-width:560px){.farrow{transform:rotate(90deg);align-self:center}.fbox{flex-basis:100%}.matrix{min-width:560px}}
+
 footer{text-align:center;color:var(--cream-dim);font-size:13.5px;margin:34px auto 0;max-width:860px;padding-top:16px;border-top:1px solid var(--line)}
 footer .moon{font-size:26px}
 a{color:var(--cyan)}
@@ -296,9 +370,30 @@ a{color:var(--cyan)}
   <ul class="chips"><li>Lecture</li><li>4 interactive tools</li><li>4 CVE case studies</li><li>Sandbox lab</li></ul>
 </header>
 
+<!-- TOC -->
+<nav class="act toc" aria-label="Contents">
+  <span class="eyebrow">☾ Contents</span>
+  <ol>
+    <li><a href="#p1"><span class="n">I</span><span class="tt"><b>DNS resolution &amp; trust</b><span>why a forged answer matters</span></span></a></li>
+    <li><a href="#p2"><span class="n">II</span><span class="tt"><b>The forged-reply race</b><span>off-path flooding</span></span></a></li>
+    <li><a href="#p3"><span class="n">III</span><span class="tt"><b>The Kaminsky technique</b><span>endless chances + delegation</span></span></a></li>
+    <li><a href="#p4"><span class="n">IV</span><span class="tt"><b>Defenses</b><span>three mitigations + DNSSEC states</span></span></a></li>
+    <li><a href="#p5"><span class="n">V</span><span class="tt"><b>Incident response</b><span>NIST lifecycle + drill</span></span></a></li>
+    <li><a href="#p6"><span class="n">VI</span><span class="tt"><b>Lab</b><span>disposable sandbox</span></span></a></li>
+    <li><a href="#p7"><span class="n">VII</span><span class="tt"><b>Recent incidents</b><span>4 CVE case studies + threat tree</span></span></a></li>
+    <li><a href="#p8"><span class="n">VIII</span><span class="tt"><b>Assessment &amp; sources</b><span>hand-in + precedents</span></span></a></li>
+  </ol>
+  <div class="toctools">
+    <a href="#tool-packet">Packet inspector</a>
+    <a href="#tool-race">Race simulator</a>
+    <a href="#tool-dnssec">DNSSEC explorer</a>
+    <a href="#tool-drill">Investigation drill</a>
+  </div>
+</nav>
+
 <!-- ACT I -->
 <section class="act">
-  <span class="eyebrow">Part I ☾ DNS resolution &amp; trust</span>
+  <span class="eyebrow" id="p1">Part I ☾ DNS resolution &amp; trust</span>
   <h2>Why a forged answer matters<span class="en">Resolvers accept consistency, not authenticity</span></h2>
   <p class="lead">People and programs speak in <strong>names</strong> (<span class="mono">www.bank.example</span>); the network routes by <strong>address</strong>. A <em>recursive resolver</em> walks the DNS tree on your behalf, then <strong>caches</strong> the answer and hands that same cached answer to everyone who asks, for its TTL.</p>
   <p>That caching is the whole prize. Classic DNS has no cryptographic way to ask <span class="q">“who is authorised to assert this record?”</span> A resolver accepts any UDP reply that merely <strong>looks</strong> consistent:</p>
@@ -311,7 +406,7 @@ a{color:var(--cyan)}
   </ul>
   <p>Consistency is not authenticity. If an attacker can match those fields, the resolver believes them. Poison one <em>shared</em> resolver once, and every user downstream is directed to an attacker-controlled host until the TTL expires, with no code running on any client.</p>
 
-  <div class="widget">
+  <div class="widget" id="tool-packet">
     <div class="wlabel">Interactive ✦ Anatomy of a DNS response</div>
     <p class="hint">Tap any underlined field. The resolver treats each one differently — some decide whether the reply is <em>matched</em> to the query, one carries the <em>payload</em>, and the authority/additional records are the ones subject to <em>bailiwick</em> checks. Addresses are documentation-only (RFC 5737).</p>
     <div class="pkt" id="pkt">
@@ -342,7 +437,7 @@ a{color:var(--cyan)}
 
 <!-- ACT II -->
 <section class="act">
-  <span class="eyebrow">Part II ☾ The forged-reply race</span>
+  <span class="eyebrow" id="p2">Part II ☾ The forged-reply race</span>
   <h2>The race against the real reply<span class="en">Off-path forged-reply flooding</span></h2>
   <p class="lead">An <strong>off-path</strong> attacker can’t see your query, so they <strong>guess</strong> the secrets (TXID + source port) and <strong>race</strong> a flood of forged replies in before the slower authoritative answer. Win the race, and the forged <span class="mono">A</span> record is cached. The real reply arrives late, matches no outstanding query, and is thrown away.</p>
   <div class="note danger"><span class="lab-l">Key point</span>
@@ -352,7 +447,7 @@ a{color:var(--cyan)}
 
 <!-- ACT III -->
 <section class="act">
-  <span class="eyebrow">Part III ☾ The Kaminsky technique</span>
+  <span class="eyebrow" id="p3">Part III ☾ The Kaminsky technique</span>
   <h2>Endless chances &amp; the delegation payload<span class="en">The 2008 escalation that still echoes in 2026</span></h2>
   <p class="lead">Lose a race and the real answer gets cached — no more chances until the TTL expires. Kaminsky’s trick: ask for a <strong>random, never-cached subdomain</strong> each time (<span class="mono">a8f1.bank.example</span>, <span class="mono">q91z.bank.example</span>…). Every one is a guaranteed cache miss → a fresh outbound query → a brand-new race, as many as you like. The attacker also <em>chose</em> the name, so they know the question exactly.</p>
   <p>And the real payload rides in the <strong>authority section</strong>: a forged <span class="mono">NS</span> record —</p>
@@ -388,7 +483,7 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
   </div>
   <p>Two cautions the numbers hide. First, the <em>effective</em> N can be far smaller than ideal: restricted ephemeral-port ranges, a weak PRNG (predictable TXID/port), NAT port rewriting, or any information leak shrinks it — that is literally the BIND <span class="mono">CVE-2025-40780</span> failure. Second, Kaminsky turns one race into <em>unlimited</em> races, so even a tiny per-race P approaches certain success given enough random-subdomain queries and time. Entropy raises the <strong>cost</strong>; it does not change <strong>whether</strong> a forged answer, once accepted, is authentic. That is why the final guardian is cryptographic.</p>
 
-  <div class="widget">
+  <div class="widget" id="tool-race">
     <div class="wlabel">Interactive ✦ Response-race simulator</div>
     <p class="hint">A <em>conceptual model</em> only: it assumes ideal randomisation and excludes real-world timing, NAT effects, and other validation checks. Set the conditions and watch the resolver’s decision.</p>
     <div class="simgrid">
@@ -407,7 +502,7 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
 
 <!-- DEFENSES -->
 <section class="act">
-  <span class="eyebrow">Part IV ☾ Defenses</span>
+  <span class="eyebrow" id="p4">Part IV ☾ Defenses</span>
   <h2>Three mitigations for cache poisoning<span class="en">Layered defense, weakest to strongest</span></h2>
   <div class="guardians">
     <div class="gcard g1"><div class="sigil">☄</div><h3>TXID + source-port randomization</h3>
@@ -426,7 +521,7 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
   <h3>DNSSEC is not a yes/no switch</h3>
   <p>Students often read “DNSSEC on” as “every answer is now authenticated.” It isn’t. A validator assigns each response one of <strong>four states</strong>, and only one of them means “cryptographically trusted.” Walk the chain of trust below and break a link to see how the state changes.</p>
 
-  <div class="widget">
+  <div class="widget" id="tool-dnssec">
     <div class="wlabel">Interactive ✦ DNSSEC chain-of-trust explorer</div>
     <p class="hint">Each zone publishes keys (<span class="mono">DNSKEY</span>) and signatures (<span class="mono">RRSIG</span>); the parent vouches for the child with a <span class="mono">DS</span> record, up to the root trust anchor. Choose a scenario:</p>
     <div class="scenbar" id="scen">
@@ -455,7 +550,7 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
 
 <!-- IR TIMELINE -->
 <section class="act">
-  <span class="eyebrow">Part V ☾ Incident response</span>
+  <span class="eyebrow" id="p5">Part V ☾ Incident response</span>
   <h2>Incident-response lifecycle for a poisoning event<span class="en">NIST SP 800-61, applied to DNS</span></h2>
   <p class="lead">The NIST SP 800-61 incident-response lifecycle. The <em>offsets below are illustrative pacing for a tabletop exercise, not mandated deadlines</em> — real timelines depend on TTLs, detection maturity, and blast radius.</p>
   <ol class="timeline">
@@ -491,7 +586,7 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
     </div></li>
   </ol>
 
-  <div class="widget">
+  <div class="widget" id="tool-drill">
     <div class="wlabel">Interactive ✦ Investigation drill — spot the poisoned trace</div>
     <p class="hint">Two <span class="mono">dig</span>-style captures for <span class="mono">www.bank.example</span>. The left is a clean baseline. In the right one, click every line you think is an anomaly, then reveal. Three lines are real indicators of poisoning.</p>
     <div class="drill">
@@ -525,7 +620,7 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
 
 <!-- LAB -->
 <section class="act">
-  <span class="eyebrow">Part VI ☾ Lab</span>
+  <span class="eyebrow" id="p6">Part VI ☾ Lab</span>
   <h2>Reproduce the attack in a disposable sandbox<span class="en">Docker · offline · removed in one command</span></h2>
   <p class="lead">A self-contained DNS environment on one <strong>internal</strong> Docker network (no route to the Internet, all domains invented): an authoritative server, an intentionally weakened recursive resolver, an off-path attacker, and a client. Observe poisoning succeed, then enable the mitigations and observe it fail.</p>
 
@@ -568,16 +663,80 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
 
 <!-- RECENT INCIDENTS -->
 <section class="act">
-  <span class="eyebrow">Part VII ☾ Recent incidents in the wild</span>
+  <span class="eyebrow" id="p7">Part VII ☾ Recent incidents in the wild</span>
   <h2>Cache poisoning’s 2025–26 comeback<span class="en">Four incidents, mapped to the three defenses</span></h2>
   <p class="lead">These aren’t new attacks — they’re the Part IV defenses switched off by implementation bugs. A wave of 2025 research (much of it from a Tsinghua University group) showed that widely used resolvers were quietly accepting records the credibility rules say to reject, and that at least one had lost its randomness. Each card tags <strong>which guardian it regresses</strong>.</p>
 
+  <h3>Incident dashboard</h3>
+  <div class="dash">
+    <div class="dtile"><div class="n">4</div><div class="c">CVEs · 2 BIND, 1 Unbound, 1 Netty</div></div>
+    <div class="dtile"><div class="n">3 / 4</div><div class="c">acceptance / bailiwick bugs (Defense 2)</div></div>
+    <div class="dtile"><div class="n">1 / 4</div><div class="c">lost randomness (Defense 1)</div></div>
+    <div class="dtile"><div class="n">8.7</div><div class="c">peak CVSS (Netty)</div></div>
+  </div>
+  <div class="tbl-scroll"><table class="matrix">
+    <tr><th>CVE</th><th>Software</th><th>Defeats</th><th>CVSS</th><th>Disclosed</th><th>Fixed</th><th>DNSSEC?</th></tr>
+    <tr><td><a href="#cve-40780">40780</a></td><td>BIND 9</td><td>D1 · randomization</td><td><span class="cvssbar"><span class="track"><span class="fill" style="width:86%"></span></span><span class="val">8.6</span></span></td><td>22 Oct 2025</td><td><span class="mono">9.18.41+</span></td><td class="yes">✓ Bogus</td></tr>
+    <tr><td><a href="#cve-40778">40778</a></td><td>BIND 9</td><td>D2 · credibility</td><td><span class="cvssbar"><span class="track"><span class="fill" style="width:86%"></span></span><span class="val">8.6</span></span></td><td>22 Oct 2025</td><td><span class="mono">9.18.41+</span></td><td class="yes">✓ Bogus</td></tr>
+    <tr><td><a href="#cve-11411">11411</a></td><td>Unbound</td><td>D2 · unsolicited</td><td><span class="cvssbar"><span class="val">High · unscored</span></span></td><td>26 Nov 2025</td><td><span class="mono">1.24.2</span></td><td class="yes">✓ Bogus</td></tr>
+    <tr><td><a href="#cve-45674">45674</a></td><td>Netty</td><td>D2 · out-of-bailiwick</td><td><span class="cvssbar"><span class="track"><span class="fill" style="width:87%"></span></span><span class="val">8.7</span></span></td><td>12 Jun 2026</td><td><span class="mono">4.1.135 / 4.2.15</span></td><td class="yes">✓ Bogus</td></tr>
+  </table></div>
+  <p class="hint">“DNSSEC?” is ✓ for all four: a signed zone turns every one of these into a <strong>Bogus</strong> answer, because none of them forge a valid signature. They defeat randomization or acceptance checks — never the cryptography.</p>
+
+  <h3>Threat model — attack tree</h3>
+  <p>Read it top-down. The goal needs <em>all three</em> AND-branches; each branch lists <em>OR</em> ways to achieve it. Leaves tagged with a CVE are the ones the incidents below realise — and the colour says which defense closes that leaf. One gate at the bottom cuts the whole tree.</p>
+  <div class="tree">
+    <ul>
+      <li><span class="node goal"><span class="lbl">GOAL — forged record accepted &amp; cached</span></span>
+        <ul>
+          <li><div class="androw"><span class="node op">AND ①</span><span class="node"><span class="lbl">Response matches the query</span><span class="sub">src IP · port · TXID · question</span></span></div>
+            <ul>
+              <li><span class="node or1"><span class="lbl">Guess TXID + port</span><span class="sub">blind, ~2³²</span></span></li>
+              <li><span class="node or1"><span class="lbl">Read the values on-path</span><span class="sub">LAN / ISP / rogue Wi-Fi</span></span></li>
+              <li><span class="node or1"><span class="lbl">Predict via weak PRNG</span> <span class="cvetag ct1">CVE-2025-40780</span></span></li>
+            </ul>
+          </li>
+          <li><div class="androw"><span class="node op">AND ②</span><span class="node"><span class="lbl">Forged reply wins the race</span><span class="sub">Kaminsky: unlimited random-subdomain windows</span></span></div></li>
+          <li><div class="androw"><span class="node op">AND ③</span><span class="node"><span class="lbl">Resolver accepts the record</span><span class="sub">credibility / bailiwick checks too loose</span></span></div>
+            <ul>
+              <li><span class="node or2"><span class="lbl">Lenient answer acceptance</span> <span class="cvetag ct2">CVE-2025-40778</span></span></li>
+              <li><span class="node or2"><span class="lbl">Unsolicited in-zone NS</span> <span class="cvetag ct2">CVE-2025-11411</span></span></li>
+              <li><span class="node or2"><span class="lbl">Out-of-bailiwick CNAME</span> <span class="cvetag ct2">CVE-2026-45674</span></span></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <div class="gatewrap"><span class="arr">▼</span><span class="node gate"><span class="lbl">🌙 GATE — DNSSEC validation</span><span class="sub">signed zone → forged RRset is Bogus → blocked, whatever happened above</span></span></div>
+    <div class="treelegend">
+      <span><span class="sw" style="border-color:var(--cyan)"></span> Defense 1 — randomization closes the match branch</span>
+      <span><span class="sw" style="border-color:var(--violet)"></span> Defense 2 — bailiwick/credibility closes the accept branch</span>
+      <span><span class="sw" style="border-color:var(--gold)"></span> Defense 3 — DNSSEC cuts the whole tree</span>
+    </div>
+  </div>
+
+  <h3>The four incidents in detail</h3>
   <div class="incidents">
 
-    <article class="incident d1">
+    <article class="incident d1" id="cve-40780">
       <div class="ih"><div class="cve">CVE-2025-40780<small>BIND 9 · the randomness guardian fails</small></div><span class="cvss">CVSS 8.6 High</span></div>
       <span class="ibadge">⟲ regresses Defense 1 · randomization</span>
       <p class="imech">A weakness in BIND’s pseudo-random number generator made its <strong>source port and query ID predictable</strong> under certain conditions. The ~2³² guessing space from Part III quietly collapses, handing a blind off-path attacker exactly the edge port randomization was meant to remove — the Stage 2 → Stage 1 regression, in production code.</p>
+      <div class="cvebody">
+        <ol class="steps">
+          <li>The resolver sends a query; its <b>source port and TXID come from the weak PRNG</b>, so they follow a predictable pattern.</li>
+          <li>The attacker reproduces the PRNG state and <b>predicts the next port + TXID</b> — no blind guessing.</li>
+          <li>A short burst of forged replies carrying those exact values arrives and <b>matches the outstanding query</b>.</li>
+          <li>The forged <span class="mono">A</span> record wins the race and is cached; the 2³² search space never applied.</li>
+        </ol>
+        <div class="flowdiag">
+          <div class="fbox fail"><span class="ft">Weak PRNG</span><span class="fs">port + TXID predictable</span><span class="tagfail">✕ Defense 1 bypassed</span></div>
+          <span class="farrow" aria-hidden="true">▶</span>
+          <div class="fbox win"><span class="ft">Forged reply matches</span><span class="fs">no guessing needed</span></div>
+          <span class="farrow" aria-hidden="true">▶</span>
+          <div class="fbox"><span class="ft">Cache poisoned</span><span class="fs">served for the TTL</span></div>
+        </div>
+      </div>
       <ol class="mini">
         <li><span class="d">8 Oct 2025</span><span class="ev">ISC early notification to supported customers</span></li>
         <li><span class="d">22 Oct 2025</span><span class="ev">Public disclosure + fixed releases</span></li>
@@ -587,10 +746,25 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
       <p class="isrc"><a href="https://kb.isc.org/docs/cve-2025-40780" target="_blank" rel="noopener">kb.isc.org/docs/cve-2025-40780</a></p>
     </article>
 
-    <article class="incident d2">
+    <article class="incident d2" id="cve-40778">
       <div class="ih"><div class="cve">CVE-2025-40778<small>BIND 9 · the credibility guardian fails</small></div><span class="cvss">CVSS 8.6 High</span></div>
       <span class="ibadge">⟲ regresses Defense 2 · bailiwick / credibility</span>
       <p class="imech">BIND was <strong>too lenient about which records it accepted from an answer</strong>, letting an off-path attacker slip forged records into the cache to influence later lookups. The resolver cached data it should have ranked as untrustworthy — a credibility failure, not a cryptographic break. Shipped in the same 22 Oct 2025 batch as the PRNG bug above, so a single BIND fix closes both.</p>
+      <div class="cvebody">
+        <ol class="steps">
+          <li>The resolver asks a question and a reply comes back (raced in, or legitimate-looking).</li>
+          <li>The reply carries <b>extra forged records</b> beyond the direct answer.</li>
+          <li>BIND accepts them <b>without ranking by credibility</b>, so low-trust data is kept.</li>
+          <li>The forged records enter the cache and <b>steer later lookups</b>.</li>
+        </ol>
+        <div class="flowdiag">
+          <div class="fbox"><span class="ft">Reply + extra RRs</span><span class="fs">more than was asked</span></div>
+          <span class="farrow" aria-hidden="true">▶</span>
+          <div class="fbox fail"><span class="ft">Lenient acceptance</span><span class="fs">no credibility ranking</span><span class="tagfail">✕ Defense 2 bypassed</span></div>
+          <span class="farrow" aria-hidden="true">▶</span>
+          <div class="fbox"><span class="ft">Cache tainted</span><span class="fs">later lookups steered</span></div>
+        </div>
+      </div>
       <ol class="mini">
         <li><span class="d">8 Oct 2025</span><span class="ev">Early notification (advisory v1)</span></li>
         <li><span class="d">22 Oct 2025</span><span class="ev">Public disclosure v2.0 + releases 9.18.41 / 9.20.15 / 9.21.14</span></li>
@@ -600,10 +774,25 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
       <p class="isrc"><a href="https://kb.isc.org/docs/cve-2025-40778.md" target="_blank" rel="noopener">kb.isc.org/docs/cve-2025-40778</a></p>
     </article>
 
-    <article class="incident d2">
+    <article class="incident d2" id="cve-11411">
       <div class="ih"><div class="cve">CVE-2025-11411<small>Unbound · unsolicited delegation accepted</small></div><span class="cvss">High</span></div>
       <span class="ibadge">⟲ regresses Defense 2 · unsolicited-record acceptance</span>
       <p class="imech">An attacker who injected <strong>unsolicited NS records</strong> (and their glue) into a reply — via spoofed packets or fragmentation — could get Unbound to accept them as trusted <em>in-zone</em> delegation and <strong>overwrite its cached delegation</strong>, hijacking the domain. This is the Kaminsky payload class: forged authority, believed because the credibility check was too loose.</p>
+      <div class="cvebody">
+        <ol class="steps">
+          <li>The attacker crafts a reply whose <b>authority section carries unsolicited NS records</b> (plus glue) for the target zone.</li>
+          <li>It is delivered via spoofed or fragmented packets alongside a plausible answer.</li>
+          <li>Unbound treats the unsolicited NS as <b>trusted in-zone delegation</b>.</li>
+          <li>It <b>overwrites the cached delegation</b> — every future name in the zone now resolves to the attacker’s nameserver.</li>
+        </ol>
+        <div class="flowdiag">
+          <div class="fbox"><span class="ft">Authority: unsolicited NS</span><span class="fs">bank.example NS ns.attacker…</span></div>
+          <span class="farrow" aria-hidden="true">▶</span>
+          <div class="fbox fail"><span class="ft">Accepted as delegation</span><span class="fs">unsolicited, kept anyway</span><span class="tagfail">✕ Defense 2 bypassed</span></div>
+          <span class="farrow" aria-hidden="true">▶</span>
+          <div class="fbox"><span class="ft">Zone hijacked</span><span class="fs">whole zone redirected</span></div>
+        </div>
+      </div>
       <ol class="mini">
         <li><span class="d">Unbound 1.24.1</span><span class="ev">Partial fix — scrubs unsolicited NS RRsets from replies</span></li>
         <li><span class="d">26 Nov 2025</span><span class="ev">Disclosure + full fix in 1.24.2 (extends scrubbing to YXDOMAIN / nodata)</span></li>
@@ -613,10 +802,25 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
       <p class="isrc"><a href="https://www.nlnetlabs.nl/downloads/unbound/CVE-2025-11411.txt" target="_blank" rel="noopener">nlnetlabs.nl · CVE-2025-11411</a></p>
     </article>
 
-    <article class="incident d2">
+    <article class="incident d2" id="cve-45674">
       <div class="ih"><div class="cve">CVE-2026-45674<small>Netty · true out-of-bailiwick CNAME</small></div><span class="cvss">CVSS 8.7 High</span></div>
       <span class="ibadge">⟲ regresses Defense 2 · genuine out-of-bailiwick</span>
       <p class="imech">Netty’s <span class="mono">DnsResolveContext</span> <strong>did not check whether CNAME records fell within the query’s bailiwick</strong>, so a response could smuggle <em>out-of-zone</em> CNAMEs into the resolver. Unlike the Unbound bug (unsolicited but in-zone), this is the textbook out-of-bailiwick case — records for a zone the answering server has no authority over, accepted anyway.</p>
+      <div class="cvebody">
+        <ol class="steps">
+          <li>While resolving a name, the client follows a <b>CNAME chain</b> in the response.</li>
+          <li>The response includes a <b>CNAME pointing outside the query’s zone</b> (out of bailiwick).</li>
+          <li>Netty’s <span class="mono">DnsResolveContext</span> <b>never checks the CNAME’s bailiwick</b>.</li>
+          <li>The out-of-zone target is <b>accepted and cached</b>, redirecting the name.</li>
+        </ol>
+        <div class="flowdiag">
+          <div class="fbox"><span class="ft">CNAME → other-zone</span><span class="fs">out of bailiwick</span></div>
+          <span class="farrow" aria-hidden="true">▶</span>
+          <div class="fbox fail"><span class="ft">No bailiwick check</span><span class="fs">DnsResolveContext skips it</span><span class="tagfail">✕ Defense 2 bypassed</span></div>
+          <span class="farrow" aria-hidden="true">▶</span>
+          <div class="fbox"><span class="ft">Redirected</span><span class="fs">cached CNAME target</span></div>
+        </div>
+      </div>
       <ol class="mini">
         <li><span class="d">12 Jun 2026</span><span class="ev">Published (GHSA-676x-f7gg-47vc)</span></li>
         <li><span class="d">2026</span><span class="ev">Fixed in 4.1.135.Final and 4.2.15.Final</span></li>
@@ -634,7 +838,7 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
 
 <!-- ASSESSMENT -->
 <section class="act">
-  <span class="eyebrow">Part VIII ☾ Assessment &amp; sources</span>
+  <span class="eyebrow" id="p8">Part VIII ☾ Assessment &amp; sources</span>
   <h2>Hand-in, reflection &amp; verified precedents<span class="en">Connect the mechanism to the real record</span></h2>
 
   <div class="note guard"><span class="lab-l">Hand-in prompt (core)</span>
