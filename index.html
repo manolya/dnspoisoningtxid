@@ -551,8 +551,9 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
 <!-- IR TIMELINE -->
 <section class="act">
   <span class="eyebrow" id="p5">Part V ☾ Incident response</span>
-  <h2>Incident-response lifecycle for a poisoning event<span class="en">NIST SP 800-61, applied to DNS</span></h2>
-  <p class="lead">The NIST SP 800-61 incident-response lifecycle. The <em>offsets below are illustrative pacing for a tabletop exercise, not mandated deadlines</em> — real timelines depend on TTLs, detection maturity, and blast radius.</p>
+  <h2>Incident-response lifecycle for a poisoning event<span class="en">NIST SP 800-61 Rev. 2, applied to DNS</span></h2>
+  <p class="lead">The classic <strong>NIST SP 800-61 Rev. 2</strong> incident-response lifecycle (Preparation → Detection &amp; Analysis → Containment / Eradication / Recovery → Post-Incident). The <em>offsets below are illustrative pacing for a tabletop exercise, not mandated deadlines</em> — real timelines depend on TTLs, detection maturity, and blast radius.</p>
+  <p class="hint">For 2026 syllabi: <strong>SP 800-61 Rev. 3</strong> (April 2025) superseded Rev. 2 and re-frames incident response around the CSF 2.0 functions — <span class="mono">Govern · Identify · Protect · Detect · Respond · Recover</span> — rather than these four phases. The phases below still map cleanly onto Detect / Respond / Recover; update the citation if your course tracks the current revision.</p>
   <ol class="timeline">
     <li class="tl prep"><div class="node">☾</div><div class="card">
       <span class="when">BEFORE · T−∞ · PREPARATION</span>
@@ -862,7 +863,7 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
     <tr><td>CVE-2025-40778<br>(BIND&nbsp;9)</td><td>Too lenient accepting unsolicited records in answers → cache injection.</td><td>Defense&nbsp;2 (bailiwick / credibility)</td><td><a href="https://kb.isc.org/docs/cve-2025-40778.md" target="_blank" rel="noopener">kb.isc.org</a></td></tr>
     <tr><td>CVE-2025-11411<br>(Unbound ≤ 1.24.1)</td><td>Unsolicited in-zone NS records in the authority section overwrite cached delegation; fixed in 1.24.2.</td><td>Defense&nbsp;2 (unsolicited-record acceptance)</td><td><a href="https://www.nlnetlabs.nl/downloads/unbound/CVE-2025-11411.txt" target="_blank" rel="noopener">nlnetlabs.nl</a></td></tr>
     <tr><td>CVE-2026-45674<br>(Netty &lt; 4.1.135 / 4.2.x)</td><td><span class="mono">DnsResolveContext</span> fails to check the bailiwick of CNAME records → out-of-bailiwick data accepted.</td><td>Defense&nbsp;2 (true out-of-bailiwick)</td><td><a href="https://vulnerability.circl.lu/vuln/CVE-2026-45674" target="_blank" rel="noopener">circl.lu</a></td></tr>
-    <tr><td>.de DNSSEC outage<br>5 May 2026</td><td>A key-rollover bug at DENIC produced duplicate key tags (33834), invalidating ~⅔ of signatures; validating resolvers saw <strong>Bogus</strong> and ~3h of .de was unresolvable.</td><td>Defense&nbsp;3 (its availability cost)</td><td><a href="https://blog.denic.de/en/final-report-dns-outage-of-5-may-2026/" target="_blank" rel="noopener">blog.denic.de</a></td></tr>
+    <tr><td>.de DNSSEC outage<br>5 May 2026</td><td>DENIC’s rollover agent generated a <strong>separate key pair per HSM</strong> — same key tag (33834) and metadata but <strong>different key material</strong> (DENIC: “not a classic key-tag collision”). Only the ~⅓ of signatures from the HSM whose private key matched the published DNSKEY validated; validating resolvers saw the rest as <strong>Bogus</strong>, and ~3h of .de was unresolvable.</td><td>Defense&nbsp;3 (its availability cost)</td><td><a href="https://blog.denic.de/en/final-report-dns-outage-of-5-may-2026/" target="_blank" rel="noopener">blog.denic.de</a></td></tr>
   </table></div>
   <p class="hint">Note the pairing: CVE-2025-11411 is <em>unsolicited in-zone</em> data, while CVE-2026-45674 is <em>genuinely out-of-bailiwick</em> — a useful distinction for the bailiwick reflection question.</p>
 </section>
