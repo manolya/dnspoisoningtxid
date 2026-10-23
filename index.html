@@ -248,6 +248,31 @@ em{color:var(--cyan);font-style:normal;font-weight:700}
 .srctbl .vok{color:var(--cyan);font-family:var(--f-term)}
 .srctbl a{color:var(--cyan);word-break:break-word}
 
+/* incident case studies */
+.incidents{display:flex;flex-direction:column;gap:16px;margin:16px 0 4px}
+.incident{border:2px solid var(--line);border-radius:18px;background:linear-gradient(180deg,rgba(52,32,111,.9),rgba(32,17,78,.92));padding:16px 18px 16px 22px;position:relative;overflow:hidden}
+.incident::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px}
+.incident.d1::before{background:var(--cyan)} .incident.d2::before{background:var(--violet)} .incident.d3::before{background:var(--gold)}
+.ih{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:flex-start;justify-content:space-between}
+.ih .cve{font-family:var(--f-disp);font-weight:800;font-size:19px;color:#fff;line-height:1.15}
+.ih .cve small{display:block;font-family:var(--f-body);font-weight:600;font-size:13.5px;color:var(--cream-dim)}
+.ih .cvss{font-family:var(--f-term);font-size:15px;color:var(--space);background:linear-gradient(180deg,#ffd0e6,#ff9fd8);border:2px solid #fff;border-radius:999px;padding:1px 11px;white-space:nowrap}
+.ibadge{display:inline-block;font-family:var(--f-term);font-size:13.5px;letter-spacing:.04em;padding:1px 10px;border-radius:999px;border:1.5px solid;margin-top:8px}
+.d1 .ibadge{color:var(--cyan);border-color:var(--cyan)} .d2 .ibadge{color:var(--violet);border-color:var(--violet)} .d3 .ibadge{color:var(--gold);border-color:var(--gold)}
+.imech{margin:10px 0 0;font-size:14.8px}
+.mini{display:flex;flex-wrap:wrap;gap:10px 0;margin:12px 0 2px;list-style:none;padding:0}
+.mini li{position:relative;flex:1 1 150px;min-width:150px;padding:0 10px 0 20px;list-style:none;margin:0}
+.mini li::before{content:"";position:absolute;left:0;top:6px;width:11px;height:11px;border-radius:50%;background:var(--pink);box-shadow:0 0 8px rgba(255,126,200,.55)}
+.mini li::after{content:"";position:absolute;left:5px;top:17px;width:2px;bottom:-10px;background:var(--line)}
+.mini li:last-child::after{display:none}
+.mini .d{font-family:var(--f-term);font-size:15.5px;color:var(--gold);display:block;line-height:1.2}
+.mini .ev{font-size:13px;color:var(--cream);display:block}
+.imeta{display:flex;flex-wrap:wrap;gap:4px 18px;margin:10px 0 0;font-size:13.8px;color:var(--cream-dim)}
+.imeta b{color:var(--cream)} .imeta .mono{font-size:15px}
+.ilab{margin:10px 0 0;font-family:var(--f-term);font-size:14.5px;color:var(--cyan)}
+.isrc{margin-top:6px;font-size:13px}
+@media (max-width:560px){.mini li::after{display:none}}
+
 footer{text-align:center;color:var(--cream-dim);font-size:13.5px;margin:34px auto 0;max-width:860px;padding-top:16px;border-top:1px solid var(--line)}
 footer .moon{font-size:26px}
 a{color:var(--cyan)}
@@ -268,7 +293,7 @@ a{color:var(--cyan)}
   <h1>DNS Cache Poisoning</h1>
   <p class="sub">Forged-reply injection against recursive resolver caches</p>
   <p class="tag">How an off-path attacker injects a forged record into a resolver cache, the probability model behind the race, the mitigations that defeat it, and the incident-response lifecycle — with interactive, conceptual tools you can poke at.</p>
-  <ul class="chips"><li>Lecture</li><li>4 interactive tools</li><li>IR timeline</li><li>Sandbox lab</li></ul>
+  <ul class="chips"><li>Lecture</li><li>4 interactive tools</li><li>4 CVE case studies</li><li>Sandbox lab</li></ul>
 </header>
 
 <!-- ACT I -->
@@ -541,9 +566,75 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
   <p>The full scaffold (four Python roles, <span class="mono">docker-compose.yml</span>, ethics and report prompts) is in <span class="mono">CSE425_dns_poisoning_lab.zip</span>. <em>That archive is distributed separately through the course page and is not embedded in this document</em>; this page is the lecture, the interactive tools, and the lab brief.</p>
 </section>
 
+<!-- RECENT INCIDENTS -->
+<section class="act">
+  <span class="eyebrow">Part VII ☾ Recent incidents in the wild</span>
+  <h2>Cache poisoning’s 2025–26 comeback<span class="en">Four incidents, mapped to the three defenses</span></h2>
+  <p class="lead">These aren’t new attacks — they’re the Part IV defenses switched off by implementation bugs. A wave of 2025 research (much of it from a Tsinghua University group) showed that widely used resolvers were quietly accepting records the credibility rules say to reject, and that at least one had lost its randomness. Each card tags <strong>which guardian it regresses</strong>.</p>
+
+  <div class="incidents">
+
+    <article class="incident d1">
+      <div class="ih"><div class="cve">CVE-2025-40780<small>BIND 9 · the randomness guardian fails</small></div><span class="cvss">CVSS 8.6 High</span></div>
+      <span class="ibadge">⟲ regresses Defense 1 · randomization</span>
+      <p class="imech">A weakness in BIND’s pseudo-random number generator made its <strong>source port and query ID predictable</strong> under certain conditions. The ~2³² guessing space from Part III quietly collapses, handing a blind off-path attacker exactly the edge port randomization was meant to remove — the Stage 2 → Stage 1 regression, in production code.</p>
+      <ol class="mini">
+        <li><span class="d">8 Oct 2025</span><span class="ev">ISC early notification to supported customers</span></li>
+        <li><span class="d">22 Oct 2025</span><span class="ev">Public disclosure + fixed releases</span></li>
+      </ol>
+      <div class="imeta"><span><b>Affected:</b> <span class="mono">BIND 9.16.0–9.21.12</span> resolvers</span><span><b>Fixed:</b> <span class="mono">9.18.41 / 9.20.15 / 9.21.14</span></span></div>
+      <p class="ilab">lab ↔ equivalent to running Stage 2 with ENTROPY silently off.</p>
+      <p class="isrc"><a href="https://kb.isc.org/docs/cve-2025-40780" target="_blank" rel="noopener">kb.isc.org/docs/cve-2025-40780</a></p>
+    </article>
+
+    <article class="incident d2">
+      <div class="ih"><div class="cve">CVE-2025-40778<small>BIND 9 · the credibility guardian fails</small></div><span class="cvss">CVSS 8.6 High</span></div>
+      <span class="ibadge">⟲ regresses Defense 2 · bailiwick / credibility</span>
+      <p class="imech">BIND was <strong>too lenient about which records it accepted from an answer</strong>, letting an off-path attacker slip forged records into the cache to influence later lookups. The resolver cached data it should have ranked as untrustworthy — a credibility failure, not a cryptographic break. Shipped in the same 22 Oct 2025 batch as the PRNG bug above, so a single BIND fix closes both.</p>
+      <ol class="mini">
+        <li><span class="d">8 Oct 2025</span><span class="ev">Early notification (advisory v1)</span></li>
+        <li><span class="d">22 Oct 2025</span><span class="ev">Public disclosure v2.0 + releases 9.18.41 / 9.20.15 / 9.21.14</span></li>
+      </ol>
+      <div class="imeta"><span><b>Affected:</b> <span class="mono">BIND 9.11.0–9.21.12</span> resolvers</span><span><b>Fixed:</b> <span class="mono">9.18.41 / 9.20.15 / 9.21.14</span></span><span><b>Found by:</b> Wu, Zhang, Liu &amp; Duan (Tsinghua Univ.)</span></div>
+      <p class="ilab">lab ↔ the resolver caches a reply Part IV says to reject.</p>
+      <p class="isrc"><a href="https://kb.isc.org/docs/cve-2025-40778.md" target="_blank" rel="noopener">kb.isc.org/docs/cve-2025-40778</a></p>
+    </article>
+
+    <article class="incident d2">
+      <div class="ih"><div class="cve">CVE-2025-11411<small>Unbound · unsolicited delegation accepted</small></div><span class="cvss">High</span></div>
+      <span class="ibadge">⟲ regresses Defense 2 · unsolicited-record acceptance</span>
+      <p class="imech">An attacker who injected <strong>unsolicited NS records</strong> (and their glue) into a reply — via spoofed packets or fragmentation — could get Unbound to accept them as trusted <em>in-zone</em> delegation and <strong>overwrite its cached delegation</strong>, hijacking the domain. This is the Kaminsky payload class: forged authority, believed because the credibility check was too loose.</p>
+      <ol class="mini">
+        <li><span class="d">Unbound 1.24.1</span><span class="ev">Partial fix — scrubs unsolicited NS RRsets from replies</span></li>
+        <li><span class="d">26 Nov 2025</span><span class="ev">Disclosure + full fix in 1.24.2 (extends scrubbing to YXDOMAIN / nodata)</span></li>
+      </ol>
+      <div class="imeta"><span><b>Affected:</b> <span class="mono">Unbound ≤ 1.24.1</span></span><span><b>Fixed:</b> <span class="mono">1.24.2</span></span><span><b>Found by:</b> Wu, Zhang, Liu &amp; Duan (Tsinghua Univ.)</span></div>
+      <p class="ilab">lab ↔ the forged NS in the authority section survives into cache.</p>
+      <p class="isrc"><a href="https://www.nlnetlabs.nl/downloads/unbound/CVE-2025-11411.txt" target="_blank" rel="noopener">nlnetlabs.nl · CVE-2025-11411</a></p>
+    </article>
+
+    <article class="incident d2">
+      <div class="ih"><div class="cve">CVE-2026-45674<small>Netty · true out-of-bailiwick CNAME</small></div><span class="cvss">CVSS 8.7 High</span></div>
+      <span class="ibadge">⟲ regresses Defense 2 · genuine out-of-bailiwick</span>
+      <p class="imech">Netty’s <span class="mono">DnsResolveContext</span> <strong>did not check whether CNAME records fell within the query’s bailiwick</strong>, so a response could smuggle <em>out-of-zone</em> CNAMEs into the resolver. Unlike the Unbound bug (unsolicited but in-zone), this is the textbook out-of-bailiwick case — records for a zone the answering server has no authority over, accepted anyway.</p>
+      <ol class="mini">
+        <li><span class="d">12 Jun 2026</span><span class="ev">Published (GHSA-676x-f7gg-47vc)</span></li>
+        <li><span class="d">2026</span><span class="ev">Fixed in 4.1.135.Final and 4.2.15.Final</span></li>
+      </ol>
+      <div class="imeta"><span><b>Affected:</b> <span class="mono">&lt; 4.1.135.Final</span>, <span class="mono">4.2.0–4.2.14.Final</span></span><span><b>Fixed:</b> <span class="mono">4.1.135.Final / 4.2.15.Final</span></span></div>
+      <p class="ilab">lab ↔ the “out of bailiwick — must be dropped” case in Part III, not dropped.</p>
+      <p class="isrc"><a href="https://vulnerability.circl.lu/vuln/CVE-2026-45674" target="_blank" rel="noopener">circl.lu · CVE-2026-45674</a></p>
+    </article>
+
+  </div>
+
+  <div class="note guard"><span class="lab-l">The pattern</span>
+  <p>Three of the four are the <strong>same class</strong>: a resolver or library accepting records the bailiwick/credibility rules say to reject (Defense 2). The fourth lost its entropy (Defense 1). None of them beat DNSSEC — a signed zone would still have returned <strong>Bogus</strong>. The takeaway for the lab: the attack hasn’t changed since 2008; what changed is implementations relaxing the checks. The counter-example — the cost of the strongest defense — is the <span class="mono">.de</span> outage in Part VIII.</p></div>
+</section>
+
 <!-- ASSESSMENT -->
 <section class="act">
-  <span class="eyebrow">Part VII ☾ Assessment &amp; sources</span>
+  <span class="eyebrow">Part VIII ☾ Assessment &amp; sources</span>
   <h2>Hand-in, reflection &amp; verified precedents<span class="en">Connect the mechanism to the real record</span></h2>
 
   <div class="note guard"><span class="lab-l">Hand-in prompt (core)</span>
@@ -559,8 +650,8 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
     <li><strong>Detection.</strong> From the investigation drill, list the three trace features you would turn into SIEM rules, and one benign event each might false-positive on.</li>
   </ul>
 
-  <h3>Verified real-world precedents</h3>
-  <p>Every precedent below was checked against a primary source (vendor advisory or registry post-mortem) on 23 Oct 2026. Re-verify versions before grading, as advisories get updated.</p>
+  <h3>Precedents — quick index</h3>
+  <p>The four CVEs have full timelines in Part VII; this table is the one-line index plus the <span class="mono">.de</span> counter-example. Every row was checked against a primary source (vendor advisory or registry post-mortem) on 23 Oct 2026. Re-verify versions before grading, as advisories get updated.</p>
   <div class="tbl-scroll"><table class="srctbl">
     <tr><th>Precedent</th><th>What broke</th><th>Regresses to</th><th>Primary source</th></tr>
     <tr><td>CVE-2025-40780<br>(BIND&nbsp;9)</td><td>Weak PRNG → source port and TXID become predictable.</td><td>Defense&nbsp;1 (randomization)</td><td><a href="https://kb.isc.org/docs/cve-2025-40780" target="_blank" rel="noopener">kb.isc.org</a></td></tr>
