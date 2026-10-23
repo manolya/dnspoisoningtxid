@@ -1,0 +1,718 @@
+<title>DNS Cache Poisoning</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Zen+Maru+Gothic:wght@400;500;700&family=VT323&display=swap">
+<style>
+/* ── Layout: one centered reading column of glossy "episode" panels on a cosmic
+      starfield; a vertical moon-node timeline; retro-terminal code blocks; and
+      interactive conceptual widgets in the same theme.
+      Single committed visual world (90s Sailor Moon cosmic night) → one theme. */
+:root{
+  --space:#160b3a; --space2:#20114e; --panel:#2a1860; --panel2:#34206f;
+  --cream:#f7ecff; --cream-dim:#cbb6e8;
+  --pink:#ff7ec8; --pink-hot:#ff4da6; --gold:#ffd84d; --cyan:#6ee9f2;
+  --ruby:#ff5577; --violet:#c79bff; --line:rgba(255,126,200,.34); --ink-term:#9ff6ff;
+  --f-disp:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Zen Maru Gothic","Baloo 2",system-ui,sans-serif;
+  --f-term:"VT323",ui-monospace,"Courier New",monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:var(--f-body);font-size:16.5px;line-height:1.72;color:var(--cream);
+  background:
+    radial-gradient(900px 600px at 80% -8%, rgba(255,126,200,.20), transparent 60%),
+    radial-gradient(800px 560px at 10% 8%, rgba(110,233,242,.14), transparent 60%),
+    linear-gradient(180deg,#1b0e46 0%,#160b3a 40%,#1d0f4e 100%);
+  background-attachment:fixed;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 60px;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 22%, #fff, transparent),
+    radial-gradient(1.4px 1.4px at 68% 14%, #ffe9fb, transparent),
+    radial-gradient(1.2px 1.2px at 42% 62%, #cfecff, transparent),
+    radial-gradient(1.8px 1.8px at 88% 52%, #fff, transparent),
+    radial-gradient(1.3px 1.3px at 26% 82%, #ffe9fb, transparent),
+    radial-gradient(1.2px 1.2px at 58% 88%, #cfecff, transparent),
+    radial-gradient(1.5px 1.5px at 92% 82%, #fff, transparent),
+    radial-gradient(1.3px 1.3px at 6% 54%, #fff, transparent);
+  opacity:.8;
+}
+.wrap{max-width:860px;margin:0 auto}
+
+/* ── hero ── */
+.hero{text-align:center;padding:52px 0 14px;position:relative}
+.moon{font-size:46px;line-height:1;filter:drop-shadow(0 0 16px rgba(255,216,77,.6))}
+.kicker{font-family:var(--f-term);font-size:21px;letter-spacing:.18em;color:var(--cyan);text-transform:uppercase;margin:12px 0 2px}
+h1{font-family:var(--f-disp);font-weight:800;font-size:clamp(40px,9vw,74px);line-height:.98;margin:4px 0 6px;color:#fff;letter-spacing:.01em;text-wrap:balance;
+  text-shadow:0 2px 0 var(--pink-hot),0 0 26px rgba(255,126,200,.65),0 0 46px rgba(255,126,200,.35)}
+.hero .sub{font-family:var(--f-disp);font-weight:700;color:var(--gold);font-size:clamp(16px,3.4vw,21px);letter-spacing:.02em;margin:0}
+.hero .tag{color:var(--cream-dim);max-width:48ch;margin:14px auto 0;font-size:15.5px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:20px 0 8px;padding:0;list-style:none}
+.chips li{font-family:var(--f-term);font-size:16px;letter-spacing:.06em;color:var(--space);background:linear-gradient(180deg,#ffe6f4,#ff9fd8);
+  border:2px solid #fff;border-radius:999px;padding:3px 14px;box-shadow:0 0 14px rgba(255,126,200,.5)}
+
+.tw{position:absolute;color:var(--gold);font-size:18px;opacity:.9;pointer-events:none;text-shadow:0 0 10px var(--gold)}
+@media (prefers-reduced-motion:no-preference){
+  .tw{animation:tw 2.6s ease-in-out infinite}
+  .tw:nth-child(2){animation-delay:.6s}.tw:nth-child(3){animation-delay:1.2s}.tw:nth-child(4){animation-delay:1.8s}
+  @keyframes tw{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+}
+
+/* ── section / episode panels ── */
+section.act{background:linear-gradient(180deg,rgba(52,32,111,.92),rgba(36,20,80,.92));
+  border:2px solid var(--line);border-radius:22px;padding:24px 26px 26px;margin:22px 0;
+  box-shadow:0 10px 30px rgba(10,4,34,.5),inset 0 1px 0 rgba(255,255,255,.08),0 0 0 4px rgba(255,126,200,.06)}
+.eyebrow{display:inline-block;font-family:var(--f-term);font-size:18px;letter-spacing:.12em;color:var(--space);
+  background:linear-gradient(180deg,#ffe36f,#ffc93d);border:2px solid #fff;padding:1px 12px;border-radius:999px;text-transform:uppercase;box-shadow:0 0 12px rgba(255,216,77,.5)}
+h2{font-family:var(--f-disp);font-weight:800;font-size:clamp(25px,5.2vw,34px);line-height:1.08;margin:12px 0 4px;color:var(--pink);text-wrap:balance;text-shadow:0 0 18px rgba(255,126,200,.45)}
+h2 .en{display:block;font-size:.5em;font-weight:600;color:var(--cyan);letter-spacing:.04em;margin-top:2px}
+h3{font-family:var(--f-disp);font-weight:700;font-size:20px;color:var(--gold);margin:22px 0 6px}
+p{margin:0 0 12px}
+strong{color:#fff}
+.lead{color:var(--cream)}
+ul{margin:0 0 12px;padding-left:4px;list-style:none}
+ul li{position:relative;padding-left:26px;margin:7px 0}
+ul li::before{content:"✦";position:absolute;left:4px;top:0;color:var(--pink);font-size:14px}
+.q{color:var(--violet)}
+em{color:var(--cyan);font-style:normal;font-weight:700}
+
+/* callouts */
+.note{border-radius:16px;padding:14px 16px 14px 18px;margin:16px 0;border:2px solid;position:relative}
+.note .lab-l{display:block;font-family:var(--f-disp);font-weight:800;font-size:13.5px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+.note p:last-child{margin:0}
+.guard{border-color:rgba(110,233,242,.6);background:rgba(110,233,242,.08)}
+.guard .lab-l{color:var(--cyan)}
+.danger{border-color:rgba(255,85,119,.6);background:rgba(255,85,119,.10)}
+.danger .lab-l{color:var(--ruby)}
+.mono{font-family:var(--f-term);font-size:1.08em;color:var(--ink-term);background:rgba(10,5,30,.6);border:1px solid var(--line);border-radius:6px;padding:0 6px}
+
+/* probability tiles */
+.odds{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0}
+.odds .tile{background:linear-gradient(180deg,rgba(255,126,200,.14),rgba(110,233,242,.08));border:2px solid var(--line);border-radius:16px;padding:14px 16px;text-align:center}
+.odds .big{font-family:var(--f-term);font-size:30px;color:var(--gold);line-height:1;letter-spacing:.02em}
+.odds .cap{font-size:13px;color:var(--cream-dim);margin-top:6px}
+
+/* guardians */
+.guardians{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:14px 0 4px}
+.gcard{background:linear-gradient(180deg,rgba(52,32,111,.9),rgba(32,17,78,.9));border:2px solid var(--line);border-radius:18px;padding:16px;position:relative;overflow:hidden}
+.gcard .sigil{font-size:26px;filter:drop-shadow(0 0 10px currentColor)}
+.gcard h3{margin:6px 0 2px;color:#fff}
+.gcard .real{font-family:var(--f-term);font-size:16px;letter-spacing:.06em}
+.gcard.g1{box-shadow:inset 0 0 0 1px rgba(110,233,242,.3)} .gcard.g1 .sigil,.gcard.g1 .real{color:var(--cyan)}
+.gcard.g2{box-shadow:inset 0 0 0 1px rgba(255,216,77,.3)} .gcard.g2 .sigil,.gcard.g2 .real{color:var(--gold)}
+.gcard.g3{box-shadow:inset 0 0 0 1px rgba(255,126,200,.35)} .gcard.g3 .sigil,.gcard.g3 .real{color:var(--pink)}
+.gcard p{font-size:14.5px;margin:6px 0 0;color:var(--cream)}
+
+/* ── terminal blocks ── */
+.term{background:#120a30;border:2px solid var(--line);border-radius:14px;margin:12px 0 16px;overflow:hidden;box-shadow:0 0 0 3px rgba(255,126,200,.06)}
+.term .bar{display:flex;align-items:center;gap:7px;padding:8px 12px;background:linear-gradient(180deg,#3a2378,#2a1860);border-bottom:1px solid var(--line)}
+.term .bar .d{width:11px;height:11px;border-radius:50%}
+.term .bar .d:nth-child(1){background:var(--ruby)}.term .bar .d:nth-child(2){background:var(--gold)}.term .bar .d:nth-child(3){background:var(--cyan)}
+.term .bar .t{margin-left:8px;font-family:var(--f-term);font-size:15px;color:var(--cream-dim);letter-spacing:.08em}
+.term pre{margin:0;padding:12px 14px;overflow-x:auto;font-family:var(--f-term);font-size:16.5px;line-height:1.5;color:var(--ink-term)}
+.term .pr{color:var(--pink)}.term .cm{color:var(--cream-dim)}.term .ok{color:var(--gold)}
+
+/* ── timeline ── */
+.timeline{list-style:none;margin:16px 0 4px;padding:0;position:relative}
+.timeline::before{content:"";position:absolute;left:19px;top:8px;bottom:8px;width:3px;background:linear-gradient(180deg,var(--cyan),var(--gold),var(--pink),var(--violet));border-radius:3px;opacity:.6}
+.tl{position:relative;padding:0 0 18px 56px;min-width:0}
+.tl .node{position:absolute;left:0;top:0;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:var(--space2);border:2px solid var(--pink);box-shadow:0 0 14px rgba(255,126,200,.5);z-index:1}
+.tl.prep .node{border-color:var(--cyan);box-shadow:0 0 14px rgba(110,233,242,.5)}
+.tl.detect .node{border-color:var(--gold);box-shadow:0 0 14px rgba(255,216,77,.5)}
+.tl.contain .node{border-color:var(--pink)}
+.tl.erad .node{border-color:var(--violet);box-shadow:0 0 14px rgba(199,155,255,.5)}
+.tl.post .node{border-color:var(--cyan);box-shadow:0 0 14px rgba(110,233,242,.5)}
+.tl .card{background:rgba(32,17,78,.74);border:2px solid var(--line);border-radius:16px;padding:12px 16px}
+.tl .when{font-family:var(--f-term);font-size:16px;letter-spacing:.08em;color:var(--gold);display:block;margin-bottom:2px}
+.tl h3{margin:0 0 4px;color:var(--pink);font-size:19px}
+.tl p{margin:0 0 6px;font-size:14.8px}
+.tl p:last-child{margin:0}
+.tl .did{font-family:var(--f-term);font-size:15.5px;color:var(--cyan)}
+
+/* stage / data tables */
+.stages{width:100%;border-collapse:separate;border-spacing:0;margin:12px 0 4px;font-size:14.5px;border:2px solid var(--line);border-radius:14px;overflow:hidden}
+.stages th,.stages td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.stages th{font-family:var(--f-disp);background:rgba(255,126,200,.14);color:#fff}
+.stages tr:last-child td{border-bottom:0}
+.stages td:first-child{font-family:var(--f-term);font-size:17px;color:var(--gold);white-space:nowrap}
+.res-bad{color:var(--ruby);font-weight:700}.res-good{color:var(--cyan);font-weight:700}
+.tbl-scroll{overflow-x:auto}
+
+/* ── interactive widgets ── */
+.widget{background:linear-gradient(180deg,rgba(28,15,66,.92),rgba(20,11,52,.94));border:2px solid var(--line);border-radius:18px;padding:16px 16px 18px;margin:18px 0}
+.widget .wlabel{display:flex;align-items:center;gap:8px;font-family:var(--f-term);font-size:16px;letter-spacing:.08em;color:var(--cyan);text-transform:uppercase;margin-bottom:4px}
+.widget .wlabel::before{content:"◈";color:var(--pink)}
+.hint{font-size:13.3px;color:var(--cream-dim);margin:2px 0 12px}
+
+/* packet inspector */
+.pkt{font-family:var(--f-term);font-size:16.5px;line-height:1.6;background:#120a30;border:2px solid var(--line);border-radius:12px;padding:12px 14px;overflow-x:auto}
+.pkt .sec{color:var(--gold)}
+.pkt .f{color:var(--ink-term);background:none;border:0;border-bottom:2px dotted rgba(110,233,242,.55);cursor:pointer;font:inherit;padding:0 1px}
+.pkt .f:hover,.pkt .f[aria-pressed=true]{color:var(--space);background:var(--cyan);border-radius:4px;border-bottom-color:transparent}
+.pkt .cm{color:var(--cream-dim)}
+.fieldinfo{margin-top:12px;border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:rgba(32,17,78,.6)}
+.fieldinfo h4{margin:0 0 4px;font-family:var(--f-disp);color:var(--pink);font-size:17px}
+.fieldinfo p{margin:0;font-size:14.5px}
+.affects{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
+.affects .a{font-family:var(--f-term);font-size:13.5px;letter-spacing:.04em;padding:1px 9px;border-radius:999px;border:1.5px solid}
+.a.match{color:var(--cyan);border-color:var(--cyan)}
+.a.deleg{color:var(--violet);border-color:var(--violet)}
+.a.cache{color:var(--gold);border-color:var(--gold)}
+.a.valid{color:var(--pink);border-color:var(--pink)}
+
+/* segmented controls */
+.simgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:4px 0 14px}
+.ctl{display:flex;flex-direction:column;gap:6px}
+.ctl .cl{font-size:13.3px;color:var(--cream-dim)}
+.seg{display:flex;border:2px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{flex:1;background:transparent;color:var(--cream);border:0;padding:7px 8px;font:inherit;font-size:14px;cursor:pointer;line-height:1.2}
+.seg button[aria-pressed=true]{background:linear-gradient(180deg,#ffe6f4,#ff9fd8);color:var(--space);font-weight:700}
+.seg.aqua button[aria-pressed=true]{background:linear-gradient(180deg,#bff6ff,#6ee9f2)}
+.slider{display:flex;align-items:center;gap:10px}
+.slider input{flex:1;accent-color:var(--pink)}
+.slider .v{font-family:var(--f-term);font-size:18px;color:var(--gold);min-width:46px;text-align:right}
+
+/* flow / verdict */
+.odds-live{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 12px}
+.odds-live .t{flex:1;min-width:130px;text-align:center;border:2px solid var(--line);border-radius:12px;padding:10px;background:rgba(255,126,200,.08)}
+.odds-live .t .n{font-family:var(--f-term);font-size:23px;color:var(--gold);line-height:1;word-break:break-word}
+.odds-live .t .c{font-size:12.3px;color:var(--cream-dim);margin-top:4px}
+.flow{display:flex;flex-direction:column;gap:8px;margin:6px 0}
+.step{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border:2px solid var(--line);border-radius:12px;background:rgba(32,17,78,.5)}
+.step .mk{font-family:var(--f-term);flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;border:2px solid}
+.step.pass .mk{color:var(--cyan);border-color:var(--cyan)} .step.pass .mk::after{content:"✓"}
+.step.fail .mk{color:var(--ruby);border-color:var(--ruby)} .step.fail .mk::after{content:"✕"}
+.step.prob .mk{color:var(--gold);border-color:var(--gold)} .step.prob .mk::after{content:"?"}
+.step .sx{min-width:0}
+.step .st{font-weight:700;color:#fff}
+.step .sd{font-size:13.6px;color:var(--cream-dim)}
+.verdictbox{margin-top:12px;border-radius:14px;padding:14px 16px;border:2px solid;font-family:var(--f-disp)}
+.verdictbox.bad{border-color:var(--ruby);background:rgba(255,85,119,.12);color:#ffd3dc}
+.verdictbox.good{border-color:var(--cyan);background:rgba(110,233,242,.1);color:#d8fbff}
+.verdictbox .vt{font-weight:800;font-size:19px;display:block;margin-bottom:2px}
+.verdictbox p{margin:0;font-family:var(--f-body);font-size:14.5px;color:var(--cream)}
+
+/* dnssec chain */
+.scenbar{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 12px}
+.scenbar button{font-family:var(--f-body);font-size:14px;color:var(--cream);background:rgba(32,17,78,.7);border:2px solid var(--line);border-radius:999px;padding:6px 13px;cursor:pointer}
+.scenbar button[aria-pressed=true]{border-color:var(--gold);color:#fff;box-shadow:0 0 12px rgba(255,216,77,.3)}
+.chain{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.lvl{border:2px solid var(--line);border-radius:14px;padding:12px 14px;background:rgba(32,17,78,.55)}
+.lvl.active{border-color:var(--gold);box-shadow:0 0 16px rgba(255,216,77,.25)}
+.lvl.secure{border-color:var(--cyan)} .lvl.bogus{border-color:var(--ruby)} .lvl.insecure{border-color:var(--violet)}
+.lvl .lz{font-family:var(--f-disp);font-weight:700;color:#fff;font-size:17px;display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.lvl .lz .badge{font-family:var(--f-term);font-size:14px;letter-spacing:.06em;padding:0 8px;border-radius:999px;border:1.5px solid}
+.lvl .rec{font-family:var(--f-term);font-size:15px;color:var(--ink-term);margin-top:6px;display:flex;flex-wrap:wrap;gap:3px 16px}
+.lvl .rec span{white-space:nowrap}
+.lvl .rec b{color:var(--gold);font-weight:400}
+.lvl .rec .broken{color:var(--ruby);text-decoration:line-through}
+.linkarrow{text-align:center;color:var(--pink);font-size:16px;line-height:.6}
+.states{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:14px}
+.sstate{border:2px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13.6px;opacity:.5;transition:opacity .2s}
+.sstate.lit{opacity:1;box-shadow:0 0 14px rgba(255,126,200,.2)}
+.sstate b{display:block;font-family:var(--f-disp);font-size:15px;margin-bottom:2px}
+.sstate.secure b{color:var(--cyan)} .sstate.insecure b{color:var(--violet)} .sstate.bogus b{color:var(--ruby)} .sstate.indet b{color:var(--gold)}
+
+/* investigation drill */
+.drill{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0}
+@media (max-width:640px){.drill{grid-template-columns:1fr}}
+.trace{border:2px solid var(--line);border-radius:12px;background:#120a30;overflow:hidden}
+.trace .th{font-family:var(--f-disp);font-size:14.5px;padding:8px 12px;border-bottom:1px solid var(--line);color:#fff}
+.trace.good .th{background:rgba(110,233,242,.14)} .trace.bad .th{background:rgba(255,85,119,.14)}
+.trace .ln{display:block;width:100%;text-align:left;font-family:var(--f-term);font-size:14.5px;line-height:1.45;color:var(--ink-term);background:transparent;border:0;border-bottom:1px solid rgba(255,126,200,.12);padding:6px 12px;cursor:pointer}
+.trace.good .ln{cursor:default}
+.trace .ln:last-child{border-bottom:0}
+.trace.bad .ln:hover{background:rgba(255,126,200,.08)}
+.trace .ln.flagged{background:rgba(255,216,77,.18)}
+.trace .ln.correct{background:rgba(110,233,242,.18);color:#d8fbff}
+.trace .ln.correct::after{content:" ◄ anomaly";color:var(--cyan);font-size:12.5px}
+.trace .ln.missed{background:rgba(255,85,119,.16)}
+.trace .ln.missed::after{content:" ◄ missed anomaly";color:var(--ruby);font-size:12.5px}
+.drillbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.btn{font-family:var(--f-body);font-weight:700;font-size:14.5px;color:var(--space);background:linear-gradient(180deg,#ffe6f4,#ff9fd8);border:2px solid #fff;border-radius:999px;padding:7px 16px;cursor:pointer;box-shadow:0 0 12px rgba(255,126,200,.4)}
+.btn.ghost{background:transparent;color:var(--cream);border-color:var(--line);box-shadow:none}
+.drillscore{font-family:var(--f-term);font-size:18px;color:var(--gold)}
+
+/* source table */
+.srctbl{width:100%;border-collapse:separate;border-spacing:0;margin:12px 0 4px;font-size:14px;border:2px solid var(--line);border-radius:14px;overflow:hidden}
+.srctbl th,.srctbl td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+.srctbl th{font-family:var(--f-disp);background:rgba(255,126,200,.14);color:#fff}
+.srctbl tr:last-child td{border-bottom:0}
+.srctbl td:first-child{font-family:var(--f-term);font-size:15px;color:var(--gold);white-space:nowrap}
+.srctbl .vok{color:var(--cyan);font-family:var(--f-term)}
+.srctbl a{color:var(--cyan);word-break:break-word}
+
+footer{text-align:center;color:var(--cream-dim);font-size:13.5px;margin:34px auto 0;max-width:860px;padding-top:16px;border-top:1px solid var(--line)}
+footer .moon{font-size:26px}
+a{color:var(--cyan)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:6px}
+@media (max-width:520px){ section.act{padding:20px 16px 22px} .tl{padding-left:50px} }
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <span class="tw" style="left:14%;top:30px">✦</span>
+  <span class="tw" style="right:16%;top:54px">✧</span>
+  <span class="tw" style="left:24%;bottom:6px">⋆</span>
+  <span class="tw" style="right:26%;bottom:18px">✦</span>
+  <div class="moon">🌙</div>
+  <div class="kicker">CSE425 ✦ Network Security ✦ Week 5</div>
+  <h1>DNS Cache Poisoning</h1>
+  <p class="sub">Forged-reply injection against recursive resolver caches</p>
+  <p class="tag">How an off-path attacker injects a forged record into a resolver cache, the probability model behind the race, the mitigations that defeat it, and the incident-response lifecycle — with interactive, conceptual tools you can poke at.</p>
+  <ul class="chips"><li>Lecture</li><li>4 interactive tools</li><li>IR timeline</li><li>Sandbox lab</li></ul>
+</header>
+
+<!-- ACT I -->
+<section class="act">
+  <span class="eyebrow">Part I ☾ DNS resolution &amp; trust</span>
+  <h2>Why a forged answer matters<span class="en">Resolvers accept consistency, not authenticity</span></h2>
+  <p class="lead">People and programs speak in <strong>names</strong> (<span class="mono">www.bank.example</span>); the network routes by <strong>address</strong>. A <em>recursive resolver</em> walks the DNS tree on your behalf, then <strong>caches</strong> the answer and hands that same cached answer to everyone who asks, for its TTL.</p>
+  <p>That caching is the whole prize. Classic DNS has no cryptographic way to ask <span class="q">“who is authorised to assert this record?”</span> A resolver accepts any UDP reply that merely <strong>looks</strong> consistent:</p>
+  <ul>
+    <li>it arrives at the <strong>source port</strong> the query went out from,</li>
+    <li>it claims the <strong>address</strong> of the server that was asked,</li>
+    <li>it carries the same 16-bit <strong>transaction ID (TXID)</strong>,</li>
+    <li>it repeats the exact <strong>question</strong>, and</li>
+    <li>it arrives while the query is still outstanding — <strong>first match wins</strong>.</li>
+  </ul>
+  <p>Consistency is not authenticity. If an attacker can match those fields, the resolver believes them. Poison one <em>shared</em> resolver once, and every user downstream is directed to an attacker-controlled host until the TTL expires, with no code running on any client.</p>
+
+  <div class="widget">
+    <div class="wlabel">Interactive ✦ Anatomy of a DNS response</div>
+    <p class="hint">Tap any underlined field. The resolver treats each one differently — some decide whether the reply is <em>matched</em> to the query, one carries the <em>payload</em>, and the authority/additional records are the ones subject to <em>bailiwick</em> checks. Addresses are documentation-only (RFC 5737).</p>
+    <div class="pkt" id="pkt">
+<div><span class="sec">UDP ENVELOPE</span>  <button class="f" data-f="env">203.0.113.53:53 → resolver:51337</button></div>
+<div> </div>
+<div><span class="sec">DNS HEADER</span></div>
+<div>  Transaction ID: <button class="f" data-f="txid">0x4A31</button></div>
+<div>  Flags: <button class="f" data-f="flags">QR=1  AA=1  RCODE=NOERROR</button></div>
+<div> </div>
+<div><span class="sec">QUESTION</span></div>
+<div>  <button class="f" data-f="q">www.bank.example.  IN  A</button></div>
+<div> </div>
+<div><span class="sec">ANSWER</span></div>
+<div>  <button class="f" data-f="ans">www.bank.example.  300  IN  A  192.0.2.10</button></div>
+<div> </div>
+<div><span class="sec">AUTHORITY</span></div>
+<div>  <button class="f" data-f="auth">bank.example.  300  IN  NS  ns1.bank.example.</button></div>
+<div> </div>
+<div><span class="sec">ADDITIONAL</span></div>
+<div>  <button class="f" data-f="add">ns1.bank.example.  300  IN  A  192.0.2.53</button></div>
+    </div>
+    <div class="fieldinfo" id="pktinfo" aria-live="polite">
+      <h4>Pick a field</h4>
+      <p>Each part of the packet plays a different role in whether the forged reply is accepted and cached.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ACT II -->
+<section class="act">
+  <span class="eyebrow">Part II ☾ The forged-reply race</span>
+  <h2>The race against the real reply<span class="en">Off-path forged-reply flooding</span></h2>
+  <p class="lead">An <strong>off-path</strong> attacker can’t see your query, so they <strong>guess</strong> the secrets (TXID + source port) and <strong>race</strong> a flood of forged replies in before the slower authoritative answer. Win the race, and the forged <span class="mono">A</span> record is cached. The real reply arrives late, matches no outstanding query, and is thrown away.</p>
+  <div class="note danger"><span class="lab-l">Key point</span>
+  <p>The attacker never breaks AES, never solves discrete log, never inverts a hash. They exploit a <strong>protocol</strong> that used a guessable number as if it were a password: a data-origin-authentication failure expressed as a network race.</p></div>
+  <p>The only things the attacker doesn’t already know are the TXID and the port. Everything else — server address, the question — is public or guessable. The <strong>attacker position</strong> matters enormously: an <em>on-path</em> attacker who can read the query off the wire learns the TXID and port directly, so randomness protects nobody against them.</p>
+</section>
+
+<!-- ACT III -->
+<section class="act">
+  <span class="eyebrow">Part III ☾ The Kaminsky technique</span>
+  <h2>Endless chances &amp; the delegation payload<span class="en">The 2008 escalation that still echoes in 2026</span></h2>
+  <p class="lead">Lose a race and the real answer gets cached — no more chances until the TTL expires. Kaminsky’s trick: ask for a <strong>random, never-cached subdomain</strong> each time (<span class="mono">a8f1.bank.example</span>, <span class="mono">q91z.bank.example</span>…). Every one is a guaranteed cache miss → a fresh outbound query → a brand-new race, as many as you like. The attacker also <em>chose</em> the name, so they know the question exactly.</p>
+  <p>And the real payload rides in the <strong>authority section</strong>: a forged <span class="mono">NS</span> record —</p>
+  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">forged authority section</span></div>
+  <pre><span class="cm"># "by the way… I run this entire zone"</span>
+bank.example.   NS   ns.attacker.example.</pre></div>
+  <p>Poisoning a single host record redirects one name. Poisoning the <span class="mono">NS</span> delegation redirects <strong>every</strong> future name in the zone (<span class="mono">www</span>, <span class="mono">mail</span>, <span class="mono">login</span>…) to the attacker.</p>
+
+  <h3>…but only if the resolver accepts that record</h3>
+  <p>The delegation payload is not automatically cached. A careful resolver applies <strong>bailiwick</strong> and <strong>credibility</strong> rules: it keeps authority/glue only for the zone the answering server is actually responsible for, and ranks an authoritative answer above an unsolicited add-on. Whether a forged record lands depends on which zone it claims:</p>
+  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">bailiwick decision — same payload, two contexts</span></div>
+<pre><span class="cm"># Query chain is resolving a8f1.bank.example via the bank.example servers</span>
+
+<span class="ok">IN BAILIWICK — may be cached</span>
+  authority:  bank.example.      NS  ns.attacker.example.
+  <span class="cm"># the answering server is within bank.example → plausibly authoritative</span>
+
+<span class="pr">OUT OF BAILIWICK — must be dropped</span>
+  authority:  example.           NS  ns.attacker.example.
+  additional: www.othersite.example.  A  203.0.113.66
+  <span class="cm"># a bank.example server has no business asserting these → reject</span></pre></div>
+  <p>So the Kaminsky payload works by staying <em>just</em> inside bailiwick — forging delegation for the very zone being queried. A resolver that over-trusts unsolicited or out-of-zone records is the one that falls (the exact class of bug behind the 2025–26 CVEs in Part VII).</p>
+
+  <h3>Why randomness buys you time, not safety</h3>
+  <p>Model one race as drawing from <strong>N</strong> equally likely (TXID, port) combinations with <strong>q</strong> blind forged replies. The chance at least one matches is</p>
+  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">per-race success probability</span></div>
+<pre>P = 1 − (1 − 1/N)^q        <span class="cm"># exact, assuming ideal independent randomness</span>
+P ≈ q / N                  <span class="cm"># good approximation only while q ≪ N</span></pre></div>
+  <div class="odds">
+    <div class="tile"><div class="big">N = 2¹⁶</div><div class="cap">TXID only (≈ 65,536)<br>pre-2008 resolvers</div></div>
+    <div class="tile"><div class="big">N ≈ 2³²</div><div class="cap">+ random port<br>≈ 4.29 billion</div></div>
+    <div class="tile"><div class="big">N = 1</div><div class="cap">on-path attacker<br>reads the values → P = 1</div></div>
+  </div>
+  <p>Two cautions the numbers hide. First, the <em>effective</em> N can be far smaller than ideal: restricted ephemeral-port ranges, a weak PRNG (predictable TXID/port), NAT port rewriting, or any information leak shrinks it — that is literally the BIND <span class="mono">CVE-2025-40780</span> failure. Second, Kaminsky turns one race into <em>unlimited</em> races, so even a tiny per-race P approaches certain success given enough random-subdomain queries and time. Entropy raises the <strong>cost</strong>; it does not change <strong>whether</strong> a forged answer, once accepted, is authentic. That is why the final guardian is cryptographic.</p>
+
+  <div class="widget">
+    <div class="wlabel">Interactive ✦ Response-race simulator</div>
+    <p class="hint">A <em>conceptual model</em> only: it assumes ideal randomisation and excludes real-world timing, NAT effects, and other validation checks. Set the conditions and watch the resolver’s decision.</p>
+    <div class="simgrid">
+      <div class="ctl"><span class="cl">Transaction ID</span><div class="seg" data-k="txid"><button data-v="pred" aria-pressed="false">Predictable</button><button data-v="rand" aria-pressed="true">Randomised</button></div></div>
+      <div class="ctl"><span class="cl">UDP source port</span><div class="seg" data-k="port"><button data-v="pred" aria-pressed="false">Predictable</button><button data-v="rand" aria-pressed="true">Randomised</button></div></div>
+      <div class="ctl"><span class="cl">Attacker position</span><div class="seg" data-k="pos"><button data-v="off" aria-pressed="true">Off-path</button><button data-v="on" aria-pressed="false">On-path</button></div></div>
+      <div class="ctl"><span class="cl">DNSSEC validation (signed zone)</span><div class="seg aqua" data-k="dnssec"><button data-v="off" aria-pressed="true">Off</button><button data-v="on" aria-pressed="false">On</button></div></div>
+    </div>
+    <div class="ctl" style="margin-bottom:12px"><span class="cl">Forged replies per race window — q = <span id="qlabel">100</span></span>
+      <div class="slider"><input type="range" id="q" min="1" max="2000" value="100" step="1"><span class="v" id="qv">100</span></div></div>
+    <div class="odds-live" id="odds"></div>
+    <div class="flow" id="flow"></div>
+    <div class="verdictbox" id="verdict" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- DEFENSES -->
+<section class="act">
+  <span class="eyebrow">Part IV ☾ Defenses</span>
+  <h2>Three mitigations for cache poisoning<span class="en">Layered defense, weakest to strongest</span></h2>
+  <div class="guardians">
+    <div class="gcard g1"><div class="sigil">☄</div><h3>TXID + source-port randomization</h3>
+      <div class="real">random TXID + port</div>
+      <p>Forces a blind off-path attacker to match 1 of ~2³² combinations. Stops blind forgery; no effect against an on-path attacker who reads the values. <em>Probabilistic.</em></p></div>
+    <div class="gcard g2"><div class="sigil">✦</div><h3>Bailiwick checking</h3>
+      <div class="real">in-zone records only</div>
+      <p>Do not cache unrelated, unsolicited authority. Rejects a server asserting records for zones it is not authoritative for. Blunts the Kaminsky payload, but not an in-zone forgery.</p></div>
+    <div class="gcard g3"><div class="sigil">🌙</div><h3>DNSSEC validation</h3>
+      <div class="real">signed RRsets</div>
+      <p>The zone signs its RRsets; a validator checks the chain of trust to the root. A forged answer carries no valid signature, so a won race is still <strong>rejected</strong>. <em>Categorical.</em></p></div>
+  </div>
+  <div class="note guard"><span class="lab-l">Note</span>
+  <p>DNSSEC proves <strong>authenticity</strong>, not privacy — it signs data, it does not hide your queries. <span class="mono">DoT/DoH</span> are the mirror: they encrypt the <em>pipe</em> to your resolver but don’t prove the answer is genuine. Different guardians, different powers; real deployments want both.</p></div>
+
+  <h3>DNSSEC is not a yes/no switch</h3>
+  <p>Students often read “DNSSEC on” as “every answer is now authenticated.” It isn’t. A validator assigns each response one of <strong>four states</strong>, and only one of them means “cryptographically trusted.” Walk the chain of trust below and break a link to see how the state changes.</p>
+
+  <div class="widget">
+    <div class="wlabel">Interactive ✦ DNSSEC chain-of-trust explorer</div>
+    <p class="hint">Each zone publishes keys (<span class="mono">DNSKEY</span>) and signatures (<span class="mono">RRSIG</span>); the parent vouches for the child with a <span class="mono">DS</span> record, up to the root trust anchor. Choose a scenario:</p>
+    <div class="scenbar" id="scen">
+      <button data-s="secure" aria-pressed="true">Signed &amp; valid</button>
+      <button data-s="bogus" aria-pressed="false">Forged answer (bad signature)</button>
+      <button data-s="insecure" aria-pressed="false">Zone not signed (no DS)</button>
+      <button data-s="indet" aria-pressed="false">No trust anchor / unreachable</button>
+    </div>
+    <div class="chain" id="chain">
+      <div class="lvl" data-z="root"><div class="lz"><span>. (root)</span><span class="badge">trust anchor</span></div><div class="rec"><span>DNSKEY <b>KSK/ZSK</b></span><span>RRSIG ✓</span><span>signs DS for <b>example.</b></span></div></div>
+      <div class="linkarrow" aria-hidden="true">▼ DS</div>
+      <div class="lvl" data-z="tld"><div class="lz"><span>example. (TLD)</span><span class="badge">parent</span></div><div class="rec"><span>DS → DNSKEY ✓</span><span>RRSIG ✓</span><span>signs DS for <b>bank.example.</b></span></div></div>
+      <div class="linkarrow" aria-hidden="true">▼ DS</div>
+      <div class="lvl" data-z="zone"><div class="lz"><span>bank.example. (zone)</span><span class="badge">answer</span></div><div class="rec"><span>DNSKEY ✓</span><span class="rr">RRSIG over the A RRset ✓</span></div></div>
+    </div>
+    <div class="verdictbox good" id="dnssec-verdict" aria-live="polite"></div>
+    <div class="states">
+      <div class="sstate secure" data-st="secure"><b>Secure</b>Signed data with an unbroken chain to the anchor. Authenticated — trust it.</div>
+      <div class="sstate insecure" data-st="insecure"><b>Insecure</b>A signed parent proves the child is <em>unsigned</em> (no DS). Accepted, but unauthenticated — exactly as vulnerable as plain DNS.</div>
+      <div class="sstate bogus" data-st="bogus"><b>Bogus</b>Data that <em>should</em> validate but doesn’t — bad/missing signature, expired RRSIG, or a forgery. Rejected: the validator returns SERVFAIL.</div>
+      <div class="sstate indet" data-st="indet"><b>Indeterminate</b>No applicable trust anchor, or the chain can’t be fetched. The validator can’t decide, so it can’t vouch for the data.</div>
+    </div>
+    <p class="hint" style="margin-top:12px">Takeaway: enabling DNSSEC validation protects you on <strong>Secure</strong> and <strong>Bogus</strong> answers (trust the first, reject the second). It does <em>not</em> authenticate <strong>Insecure</strong> zones — most of the namespace is still unsigned — which is why randomisation and bailiwick checking still matter.</p>
+  </div>
+</section>
+
+<!-- IR TIMELINE -->
+<section class="act">
+  <span class="eyebrow">Part V ☾ Incident response</span>
+  <h2>Incident-response lifecycle for a poisoning event<span class="en">NIST SP 800-61, applied to DNS</span></h2>
+  <p class="lead">The NIST SP 800-61 incident-response lifecycle. The <em>offsets below are illustrative pacing for a tabletop exercise, not mandated deadlines</em> — real timelines depend on TTLs, detection maturity, and blast radius.</p>
+  <ol class="timeline">
+    <li class="tl prep"><div class="node">☾</div><div class="card">
+      <span class="when">BEFORE · T−∞ · PREPARATION</span>
+      <h3>Harden before the incident</h3>
+      <p>Enable source-port randomization and DNSSEC validation. Log every query. Baseline normal answers and SERVFAIL rates. Keep serve-stale ready and a known-good fallback resolver available.</p>
+      <p class="did">lab ↔ the target resolver configuration (ENTROPY=on, VALIDATE=on).</p>
+    </div></li>
+    <li class="tl detect"><div class="node">★</div><div class="card">
+      <span class="when">T+0 → T+15m · DETECTION &amp; ANALYSIS</span>
+      <h3>Detection</h3>
+      <p>Users report cert warnings or the “wrong site.” The SIEM flags a cached <span class="mono">A</span>/<span class="mono">NS</span> record that disagrees with the authoritative zone, a spike in odd TXIDs, or a burst of random-subdomain queries (the Kaminsky signature).</p>
+      <p class="did">confirm: which names, which resolver, how much TTL is left, attacker position (off-path / on-path / malicious resolver).</p>
+    </div></li>
+    <li class="tl contain"><div class="node">✦</div><div class="card">
+      <span class="when">T+15m → T+1h · CONTAINMENT</span>
+      <h3>Containment</h3>
+      <p>Flush the poisoned cache entries <em>and</em> the related delegation. Fail critical names over to a known-good resolver or serve stale from trusted data. Rate-limit or block the forged-reply source if identifiable.</p>
+      <p class="did">lab ↔ containment = <span class="mono">docker compose down</span> (flush the poisoned cache and the lab network).</p>
+    </div></li>
+    <li class="tl erad"><div class="node">☄</div><div class="card">
+      <span class="when">T+1h → T+4h · ERADICATION &amp; RECOVERY</span>
+      <h3>Patch, verify, and re-warm</h3>
+      <p>Patch the resolver to the fixed build, verify port randomization is actually on, turn on DNSSEC validation, restart, then re-warm the cache from the authoritative source and confirm answers match.</p>
+      <p class="did">lab ↔ recovery = bring it back up with <span class="mono">ENTROPY=on VALIDATE=on</span> and watch poisoning drop to 0.</p>
+    </div></li>
+    <li class="tl post"><div class="node">🌙</div><div class="card">
+      <span class="when">T+1d → T+7d · POST-INCIDENT</span>
+      <h3>Post-incident analysis</h3>
+      <p>Root-cause the event to a CVE or misconfiguration. Add detections (cached-vs-authoritative mismatch, NS-record changes, TXID anomalies). Update the tabletop. Coordinate disclosure if the finding is novel.</p>
+      <p class="did">precedents are collected and verified in Part VII — map each to the defense it regresses.</p>
+    </div></li>
+  </ol>
+
+  <div class="widget">
+    <div class="wlabel">Interactive ✦ Investigation drill — spot the poisoned trace</div>
+    <p class="hint">Two <span class="mono">dig</span>-style captures for <span class="mono">www.bank.example</span>. The left is a clean baseline. In the right one, click every line you think is an anomaly, then reveal. Three lines are real indicators of poisoning.</p>
+    <div class="drill">
+      <div class="trace good">
+        <div class="th">✓ baseline (known-good resolver)</div>
+        <div class="ln">;; flags: qr rd ra; status: NOERROR</div>
+        <div class="ln">;; ANSWER:</div>
+        <div class="ln">www.bank.example. 290 IN A 192.0.2.10</div>
+        <div class="ln">;; AUTHORITY:</div>
+        <div class="ln">bank.example. 290 IN NS ns1.bank.example.</div>
+        <div class="ln">;; SERVER: 198.51.100.7#53</div>
+      </div>
+      <div class="trace bad" id="badtrace">
+        <div class="th">? suspect resolver — flag the anomalies</div>
+        <button class="ln" data-bad="1">;; flags: qr aa rd ra; status: NOERROR</button>
+        <button class="ln" data-bad="0">;; ANSWER:</button>
+        <button class="ln" data-bad="1">www.bank.example. 86400 IN A 203.0.113.66</button>
+        <button class="ln" data-bad="0">;; AUTHORITY:</button>
+        <button class="ln" data-bad="1">bank.example. 86400 IN NS ns.attacker.example.</button>
+        <button class="ln" data-bad="0">;; SERVER: 198.51.100.7#53</button>
+      </div>
+    </div>
+    <div class="drillbar">
+      <button class="btn" id="drill-reveal">Reveal anomalies</button>
+      <button class="btn ghost" id="drill-reset">Reset</button>
+      <span class="drillscore" id="drill-score"></span>
+    </div>
+    <div class="fieldinfo" id="drill-explain" hidden></div>
+  </div>
+</section>
+
+<!-- LAB -->
+<section class="act">
+  <span class="eyebrow">Part VI ☾ Lab</span>
+  <h2>Reproduce the attack in a disposable sandbox<span class="en">Docker · offline · removed in one command</span></h2>
+  <p class="lead">A self-contained DNS environment on one <strong>internal</strong> Docker network (no route to the Internet, all domains invented): an authoritative server, an intentionally weakened recursive resolver, an off-path attacker, and a client. Observe poisoning succeed, then enable the mitigations and observe it fail.</p>
+
+  <div class="note danger"><span class="lab-l">Scope &amp; ethics</span>
+  <p>The target is an intentionally weakened teaching resolver; Stage&nbsp;1 removes TXID/port randomization and answer validation. Everything runs on one disposable, Internet-isolated Docker network with invented domains. There is no source-IP spoofing and no raw-socket flooder, and nothing here functions outside the lab network. Running a forged-reply flooder against a resolver you do not own is a criminal offence (Türkiye: TCK Art.&nbsp;243–244) and violates university acceptable-use policy. The deliverable is <span class="mono">lab_report.md</span>, not a working tool. Teardown removes all state: <span class="mono">docker compose down</span>.</p></div>
+
+  <p class="hint" style="margin:0 0 6px">The results below are the <strong>expected demonstration outcomes</strong> for the reference scaffold — the pattern students should reproduce and record, not measurements shipped inside this page. Paste your own run’s counts and logs into <span class="mono">lab_report.md</span>.</p>
+  <div class="tbl-scroll"><table class="stages">
+    <tr><th>Stage</th><th>Setting</th><th>Expected outcome</th><th>Lesson</th></tr>
+    <tr><td>1</td><td>Weak resolver — predictable TXID + port, no validation</td><td class="res-bad">POISONED (typ. 3/3)</td><td>one won race poisons the shared cache for the whole TTL</td></tr>
+    <tr><td>2</td><td><span class="mono">ENTROPY=on</span> — random TXID + port</td><td class="res-good">no poisoning in a short run (e.g. 0/30)</td><td>blind guessing collapses — see the caveat below</td></tr>
+    <tr><td>3</td><td><span class="mono">VALIDATE=on</span> — lab DNSSEC</td><td class="res-good">no poisoning (e.g. 0/10)</td><td>attacker still <strong>wins the race</strong> — but no valid signature, so it’s rejected</td></tr>
+  </table></div>
+  <div class="note guard"><span class="lab-l">Read the numbers honestly</span>
+  <p>“0 in 30 trials” does <em>not</em> measure the success probability — with N ≈ 2³² the expected count in 30 short races is essentially zero, so a clean run is merely <em>consistent</em> with the <span class="mono">P = 1 − (1 − 1/N)^q</span> bound, not a measurement of it. To actually observe the bound, shrink N (e.g. restrict the port range) so events become countable, or compute the expected count and compare. Stage 3 is categorical, not statistical: zero follows from signature failure, so one clean trial already demonstrates the mechanism.</p></div>
+
+  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">~/dnslab — run the three stages</span></div>
+<pre><span class="pr">$</span> docker compose build
+<span class="pr">$</span> docker compose up                         <span class="cm"># Stage 1 → POISONED</span>
+<span class="pr">$</span> docker compose down
+<span class="pr">$</span> ENTROPY=on CACHE=off COUNT=30 docker compose up    <span class="cm"># Stage 2</span>
+<span class="pr">$</span> VALIDATE=on CACHE=off COUNT=10 docker compose up   <span class="cm"># Stage 3</span>
+<span class="pr">$</span> docker compose down                       <span class="ok"># teardown — nothing persists</span>
+
+<span class="cm"># no Docker? plain WSL2 / Linux, loopback, high ports:</span>
+<span class="pr">$</span> bash run_local.sh</pre></div>
+
+  <h3>Trace comparison — what each resolver actually does</h3>
+  <p>The distinction Stage 3 teaches, side by side: both resolvers can lose the race, but only one performs cryptographic authentication.</p>
+  <div class="tbl-scroll"><table class="stages">
+    <tr><th>Event</th><th>Weak resolver</th><th>DNSSEC-validating resolver</th></tr>
+    <tr><td>Forged reply arrives first</td><td>possible TXID/port match</td><td>possible TXID/port match</td></tr>
+    <tr><td>Reply accepted for processing</td><td>yes, if fields match</td><td>yes, if fields match</td></tr>
+    <tr><td>Cryptographic authentication</td><td class="res-bad">not performed</td><td class="res-good">RRSIG checked against the chain</td></tr>
+    <tr><td>Result for a properly signed zone</td><td class="res-bad">malicious record cached</td><td class="res-good">Bogus → SERVFAIL, nothing cached</td></tr>
+  </table></div>
+
+  <p>The full scaffold (four Python roles, <span class="mono">docker-compose.yml</span>, ethics and report prompts) is in <span class="mono">CSE425_dns_poisoning_lab.zip</span>. <em>That archive is distributed separately through the course page and is not embedded in this document</em>; this page is the lecture, the interactive tools, and the lab brief.</p>
+</section>
+
+<!-- ASSESSMENT -->
+<section class="act">
+  <span class="eyebrow">Part VII ☾ Assessment &amp; sources</span>
+  <h2>Hand-in, reflection &amp; verified precedents<span class="en">Connect the mechanism to the real record</span></h2>
+
+  <div class="note guard"><span class="lab-l">Hand-in prompt (core)</span>
+  <p>In Stage&nbsp;3 the attacker still won the race, yet nothing was poisoned. Explain the difference between <strong>winning the race</strong> and <strong>being believed</strong> — then map each CVE in the table below to the lab stage / defense it regresses to.</p></div>
+
+  <h3>Reflection questions</h3>
+  <ul>
+    <li><strong>Packet.</strong> Using the Part&nbsp;I inspector, name every field a forged reply must match, and say which single field the Kaminsky method makes trivial for the attacker to get right.</li>
+    <li><strong>Probability.</strong> For N = 2³² and q = 1000 forged replies per window, compute P per window with the exact formula and with the q/N approximation. How many random-subdomain windows give a cumulative success chance above 50%?</li>
+    <li><strong>Bailiwick.</strong> Give one forged authority record that a correct resolver <em>caches</em> and one it <em>rejects</em> for the same query, and state the rule that separates them.</li>
+    <li><strong>DNSSEC states.</strong> A validating resolver returns SERVFAIL for a bank’s website during a key rollover, while an unsigned blog resolves fine. Classify each as Secure / Insecure / Bogus / Indeterminate and explain the availability trade-off (tie it to the <span class="mono">.de</span> event below).</li>
+    <li><strong>On-path vs off-path.</strong> Which of the three defenses helps against an on-path attacker, and why do the other two not?</li>
+    <li><strong>Detection.</strong> From the investigation drill, list the three trace features you would turn into SIEM rules, and one benign event each might false-positive on.</li>
+  </ul>
+
+  <h3>Verified real-world precedents</h3>
+  <p>Every precedent below was checked against a primary source (vendor advisory or registry post-mortem) on 23 Oct 2026. Re-verify versions before grading, as advisories get updated.</p>
+  <div class="tbl-scroll"><table class="srctbl">
+    <tr><th>Precedent</th><th>What broke</th><th>Regresses to</th><th>Primary source</th></tr>
+    <tr><td>CVE-2025-40780<br>(BIND&nbsp;9)</td><td>Weak PRNG → source port and TXID become predictable.</td><td>Defense&nbsp;1 (randomization)</td><td><a href="https://kb.isc.org/docs/cve-2025-40780" target="_blank" rel="noopener">kb.isc.org</a></td></tr>
+    <tr><td>CVE-2025-40778<br>(BIND&nbsp;9)</td><td>Too lenient accepting unsolicited records in answers → cache injection.</td><td>Defense&nbsp;2 (bailiwick / credibility)</td><td><a href="https://kb.isc.org/docs/cve-2025-40778.md" target="_blank" rel="noopener">kb.isc.org</a></td></tr>
+    <tr><td>CVE-2025-11411<br>(Unbound ≤ 1.24.1)</td><td>Unsolicited in-zone NS records in the authority section overwrite cached delegation; fixed in 1.24.2.</td><td>Defense&nbsp;2 (unsolicited-record acceptance)</td><td><a href="https://www.nlnetlabs.nl/downloads/unbound/CVE-2025-11411.txt" target="_blank" rel="noopener">nlnetlabs.nl</a></td></tr>
+    <tr><td>CVE-2026-45674<br>(Netty &lt; 4.1.135 / 4.2.x)</td><td><span class="mono">DnsResolveContext</span> fails to check the bailiwick of CNAME records → out-of-bailiwick data accepted.</td><td>Defense&nbsp;2 (true out-of-bailiwick)</td><td><a href="https://vulnerability.circl.lu/vuln/CVE-2026-45674" target="_blank" rel="noopener">circl.lu</a></td></tr>
+    <tr><td>.de DNSSEC outage<br>5 May 2026</td><td>A key-rollover bug at DENIC produced duplicate key tags (33834), invalidating ~⅔ of signatures; validating resolvers saw <strong>Bogus</strong> and ~3h of .de was unresolvable.</td><td>Defense&nbsp;3 (its availability cost)</td><td><a href="https://blog.denic.de/en/final-report-dns-outage-of-5-may-2026/" target="_blank" rel="noopener">blog.denic.de</a></td></tr>
+  </table></div>
+  <p class="hint">Note the pairing: CVE-2025-11411 is <em>unsolicited in-zone</em> data, while CVE-2026-45674 is <em>genuinely out-of-bailiwick</em> — a useful distinction for the bailiwick reflection question.</p>
+</section>
+
+<footer>
+  <div class="moon">☾</div>
+  <p>CSE425 Network Security · Akdeniz University · Dr. Manolya Atalay<br>
+  Lecture, interactive tools, incident-response timeline, and sandbox lab. For course study only. All attack tooling stays inside the disposable lab network.</p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+/* ───────── Packet inspector ───────── */
+(function(){
+  const F={
+    env:{h:"UDP envelope — source IP + destination port",a:["match"],t:"The reply must come from the IP the resolver asked and land on the exact source port the query left from. An off-path attacker can't see the port, so they guess it; randomising it is the first defense."},
+    txid:{h:"Transaction ID — 0x4A31",a:["match"],t:"A 16-bit number the resolver put in its query and expects echoed back. One of only two secrets a blind attacker must guess — about 65,536 possibilities on its own."},
+    flags:{h:"Header flags — QR=1, AA=1, RCODE=NOERROR",a:["match"],t:"QR=1 marks a response, AA=1 claims 'authoritative answer', RCODE=NOERROR says success. They must look plausible but carry no secret, so they never stop a forgery by themselves."},
+    q:{h:"Question — www.bank.example. IN A",a:["match"],t:"Must match the outstanding question byte-for-byte. In a Kaminsky attack the attacker chose the (random) name, so they already know the question exactly — the question stops being a meaningful barrier."},
+    ans:{h:"Answer — www.bank.example. 300 IN A 192.0.2.10",a:["cache"],t:"The payload. If the whole reply is accepted, this address is cached and served to every downstream user for the TTL (300 s here)."},
+    auth:{h:"Authority — bank.example. 300 IN NS ns1.bank.example.",a:["deleg","cache"],t:"The real prize in a Kaminsky attack: a forged NS record that re-delegates the whole zone. Cached only if it passes bailiwick and credibility checks — a resolver should refuse authority for a zone this server has no business answering for."},
+    add:{h:"Additional — ns1.bank.example. 300 IN A 192.0.2.53",a:["deleg","cache"],t:"Glue that points the (possibly forged) nameserver at an address. Same gate as the authority section: a resolver must not cache out-of-bailiwick glue — the exact lesson behind CVE-2026-45674."}
+  };
+  const LBL={match:["match","matching"],deleg:["deleg","delegation"],cache:["cache","caching"],valid:["valid","validation"]};
+  const box=document.getElementById("pktinfo"), btns=[...document.querySelectorAll("#pkt .f")];
+  function show(k,btn){
+    btns.forEach(b=>b.setAttribute("aria-pressed", String(b===btn)));
+    const f=F[k]; const chips=f.a.map(a=>'<span class="a '+LBL[a][0]+'">'+LBL[a][1]+'</span>').join("");
+    box.innerHTML='<h4>'+f.h+'</h4><p>'+f.t+'</p><div class="affects">'+chips+'</div>';
+  }
+  btns.forEach(b=>b.addEventListener("click",()=>show(b.dataset.f,b)));
+})();
+
+/* ───────── Response-race simulator ───────── */
+(function(){
+  const state={txid:"rand",port:"rand",pos:"off",dnssec:"off"};
+  let q=100;
+  const odds=document.getElementById("odds"), flow=document.getElementById("flow"), verdict=document.getElementById("verdict");
+  const segs=[...document.querySelectorAll(".simgrid .seg")];
+  const fmt=n=>{ if(n>=1e9)return (n/1e9).toFixed(2)+" bn"; if(n>=1e6)return (n/1e6).toFixed(1)+" M"; return n.toLocaleString(); };
+  function P(N,q){ if(N<=1)return 1; return 1-Math.pow(1-1/N,q); }
+  function render(){
+    const on=state.pos==="on";
+    const txSpace=state.txid==="rand"?65536:1;
+    const portSpace=state.port==="rand"?65536:1;
+    const N=on?1:txSpace*portSpace;
+    const p=P(N,q);
+    const windows = p>=1?1:(p<=0?Infinity:Math.max(1,Math.round(1/p)));
+    const pPct = p>=0.999?"≈ 100%":(p<0.0001?(p*100).toExponential(1)+"%":(p*100).toFixed(p<1?2:0)+"%");
+    odds.innerHTML=
+      '<div class="t"><div class="n">'+(on?"1":fmt(N))+'</div><div class="c">search space N '+(on?"(read off the wire)":"= TXID × port")+'</div></div>'+
+      '<div class="t"><div class="n">'+pPct+'</div><div class="c">P(match) in one race, q='+q+'</div></div>'+
+      '<div class="t"><div class="n">'+(windows===Infinity?"—":"~"+fmt(windows))+'</div><div class="c">Kaminsky windows to first hit</div></div>';
+
+    // decision chain
+    const steps=[];
+    if(on) steps.push(["pass","Match the TXID + port","On-path: the attacker reads both values directly, so the forged reply matches with certainty."]);
+    else if(p>=0.5) steps.push(["prob","Match the TXID + port","Blind guess — but with these settings a match is fairly likely per window, and Kaminsky gives unlimited windows."]);
+    else steps.push(["prob","Match the TXID + port","Blind guess — unlikely per window ("+pPct+"), yet unlimited random-subdomain windows make eventual success near-certain given time."]);
+    steps.push(["pass","Win the race","We model the forged reply arriving before the authoritative one."]);
+    steps.push(["pass","Pass bailiwick","The Kaminsky payload forges delegation for the very zone being queried, so it stays in-bailiwick."]);
+    if(state.dnssec==="on") steps.push(["fail","Validate the signature","Signed zone: the forged RRset has no valid RRSIG → Bogus → rejected."]);
+    else steps.push(["fail","Validate the signature","No DNSSEC validation — the resolver performs no cryptographic check at all."]);
+    flow.innerHTML=steps.map(s=>'<div class="step '+s[0]+'"><span class="mk"></span><span class="sx"><span class="st">'+s[1]+'</span><span class="sd"> — '+s[2]+'</span></span></div>').join("");
+
+    // verdict
+    if(state.dnssec==="on"){
+      verdict.className="verdictbox good";
+      verdict.innerHTML='<span class="vt">🌙 Cache stays clean</span><p>The race can be won, but a signed zone means the forged record fails signature validation and is rejected (Bogus → SERVFAIL). Entropy changed <strong>how long</strong>; DNSSEC changed <strong>whether</strong>.</p>';
+    } else if(on){
+      verdict.className="verdictbox bad";
+      verdict.innerHTML='<span class="vt">☠ Poisoned — certainly</span><p>An on-path attacker reads the TXID and port, so randomisation gives zero protection. With no signature to check, the forged record is accepted and cached for the whole TTL.</p>';
+    } else if(p>=0.25){
+      verdict.className="verdictbox bad";
+      verdict.innerHTML='<span class="vt">☠ Poisoned — likely, fast</span><p>With this little entropy a blind attacker matches within a handful of windows. Turn randomisation on for both TXID and port to push N toward 2³².</p>';
+    } else {
+      verdict.className="verdictbox bad";
+      verdict.innerHTML='<span class="vt">☠ Poisoned — eventually</span><p>Per-window odds are tiny ('+pPct+'), but Kaminsky supplies unlimited windows, so a patient off-path attacker still succeeds. Randomisation raises the cost; only DNSSEC removes the win. Switch validation on.</p>';
+    }
+  }
+  segs.forEach(function(seg){
+    const k=seg.dataset.k;
+    seg.querySelectorAll("button").forEach(function(b){
+      b.addEventListener("click",function(){
+        state[k]=b.dataset.v;
+        seg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+        render();
+      });
+    });
+  });
+  const qs=document.getElementById("q");
+  qs.addEventListener("input",()=>{ q=+qs.value; document.getElementById("qv").textContent=q; document.getElementById("qlabel").textContent=q; render(); });
+  render();
+})();
+
+/* ───────── DNSSEC chain explorer ───────── */
+(function(){
+  const chain=document.getElementById("chain"), vbox=document.getElementById("dnssec-verdict"), scen=document.getElementById("scen");
+  const lvls={root:chain.querySelector('[data-z=root]'),tld:chain.querySelector('[data-z=tld]'),zone:chain.querySelector('[data-z=zone]')};
+  const states=[...document.querySelectorAll(".sstate")];
+  const SC={
+    secure:{cls:"secure",st:"secure",zoneRec:'<span>DNSKEY ✓</span><span>RRSIG over the A RRset ✓</span>',
+      vt:"✓ Secure",msg:"Every link checks out from the root anchor to the answer's RRSIG. The data is authenticated — the resolver trusts and caches it."},
+    bogus:{cls:"bogus",st:"bogus",zoneRec:'<span>DNSKEY ✓</span><span class="broken">RRSIG over the A RRset ✗ (forged)</span>',
+      vt:"✗ Bogus",msg:"The zone is signed, but this answer's signature doesn't verify (a forgery, a bad or expired RRSIG). The validator refuses it and returns SERVFAIL — nothing is cached. This is how DNSSEC defeats a won race."},
+    insecure:{cls:"insecure",st:"insecure",zoneRec:'<span class="broken">no DNSKEY / no DS at parent</span><span>proven unsigned</span>',
+      vt:"◌ Insecure",msg:"The signed parent carries no DS for this child, which cryptographically proves the zone is unsigned. The answer is accepted but unauthenticated — exactly as spoofable as plain DNS. Most of the namespace lives here."},
+    indet:{cls:"indet",st:"indet",zoneRec:'<span>DNSKEY ?</span><span>RRSIG ?</span>',
+      vt:"? Indeterminate",msg:"No usable trust anchor, or the DS/DNSKEY/RRSIG chain can't be fetched. The validator can't establish a status, so it can't vouch for the data either way."}
+  };
+  function set(s){
+    const c=SC[s];
+    scen.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.s===s)));
+    Object.values(lvls).forEach(l=>l.className="lvl");
+    lvls.zone.querySelector(".rec").innerHTML=c.zoneRec;
+    if(s==="secure"){lvls.root.classList.add("secure");lvls.tld.classList.add("secure");lvls.zone.classList.add("secure");}
+    else if(s==="bogus"){lvls.root.classList.add("secure");lvls.tld.classList.add("secure");lvls.zone.classList.add("bogus");}
+    else if(s==="insecure"){lvls.root.classList.add("secure");lvls.tld.classList.add("secure");lvls.zone.classList.add("insecure");}
+    else {lvls.root.classList.add("active");lvls.tld.classList.add("active");lvls.zone.classList.add("active");}
+    states.forEach(x=>x.classList.toggle("lit",x.dataset.st===c.st));
+    vbox.className="verdictbox "+(s==="secure"?"good":"bad");
+    vbox.innerHTML='<span class="vt">'+c.vt+'</span><p>'+c.msg+'</p>';
+  }
+  scen.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>set(b.dataset.s)));
+  set("secure");
+})();
+
+/* ───────── Investigation drill ───────── */
+(function(){
+  const trace=document.getElementById("badtrace"), scoreEl=document.getElementById("drill-score"), explain=document.getElementById("drill-explain");
+  const lines=[...trace.querySelectorAll(".ln")];
+  const WHY="<h4>What the three anomalies mean</h4><p><b>aa flag set</b> — a recursive cache answer should be non-authoritative (no <span class='mono'>aa</span>); forged replies often copy it in by mistake. <b>TTL 86400 + foreign A</b> — an unusually long TTL pins the poison in cache, and <span class='mono'>203.0.113.66</span> is a different netblock from the baseline <span class='mono'>192.0.2.10</span>. <b>NS = ns.attacker.example</b> — the delegation itself was rewritten, the Kaminsky prize.</p>";
+  let revealed=false;
+  lines.forEach(l=>l.addEventListener("click",()=>{ if(revealed)return; l.classList.toggle("flagged"); }));
+  document.getElementById("drill-reveal").addEventListener("click",()=>{
+    revealed=true; let hit=0,wrong=0,miss=0;
+    lines.forEach(l=>{ const bad=l.dataset.bad==="1", flagged=l.classList.contains("flagged"); l.classList.remove("flagged");
+      if(bad&&flagged){l.classList.add("correct");hit++;} else if(bad&&!flagged){l.classList.add("missed");miss++;} else if(!bad&&flagged){l.classList.add("missed");wrong++;} });
+    scoreEl.textContent="Found "+hit+" / 3"+(wrong?" · "+wrong+" false positive"+(wrong>1?"s":""):"");
+    explain.hidden=false; explain.innerHTML=WHY;
+  });
+  document.getElementById("drill-reset").addEventListener("click",()=>{
+    revealed=false; lines.forEach(l=>l.className="ln"); scoreEl.textContent=""; explain.hidden=true;
+  });
+})();
+</script>
