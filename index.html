@@ -384,6 +384,7 @@ a{color:var(--cyan)}
     <li><a href="#p8"><span class="n">VIII</span><span class="tt"><b>Assessment &amp; sources</b><span>hand-in + precedents</span></span></a></li>
   </ol>
   <div class="toctools">
+    <a href="#live-cve">Live CVE feed</a>
     <a href="#tool-packet">Packet inspector</a>
     <a href="#tool-race">Race simulator</a>
     <a href="#tool-dnssec">DNSSEC explorer</a>
@@ -836,6 +837,120 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
   <div class="note guard"><span class="lab-l">The pattern</span>
   <p>Three of the four are the <strong>same class</strong>: a resolver or library accepting records the bailiwick/credibility rules say to reject (Defense 2). The fourth lost its entropy (Defense 1). None of them beat DNSSEC — a signed zone would still have returned <strong>Bogus</strong>. The takeaway for the lab: the attack hasn’t changed since 2008; what changed is implementations relaxing the checks. The counter-example — the cost of the strongest defense — is the <span class="mono">.de</span> outage in Part VIII.</p></div>
 </section>
+
+<!-- ════════ LIVE CVE FEED (auto-synced from NVD via GitHub Action) ════════ -->
+<section class="act cve-live" id="live-cve" aria-labelledby="live-cve-h">
+  <style>
+  .cve-live{
+    --p:#ff7ec8;--g:#ffd84d;--c:#6ee9f2;--r:#ff5577;--v:#c79bff;
+    --cream:#f7ecff;--dim:#cbb6e8;--line:rgba(255,126,200,.34);
+    --panel:rgba(32,17,78,.74);
+    --fd:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+    --fb:"Zen Maru Gothic","Baloo 2",system-ui,sans-serif;
+    --ft:"VT323",ui-monospace,"Courier New",monospace;
+  }
+  .cve-live .live-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;justify-content:space-between;margin:12px 0 2px}
+  .cve-live .synced{font-family:var(--ft);font-size:16px;letter-spacing:.06em;color:var(--c)}
+  .cve-live .synced b{color:var(--g);font-weight:400}
+  .cve-live .live-intro{color:var(--cream);margin:10px 0 4px}
+  .cve-live .legend{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0 16px;padding:0;list-style:none}
+  .cve-live .legend li{font-family:var(--ft);font-size:15px;letter-spacing:.04em;color:var(--cream);
+    border:1px solid var(--line);border-radius:999px;padding:1px 11px;background:rgba(255,126,200,.08)}
+  .cve-live .legend li::before{content:"●";margin-right:6px;color:var(--tagc,var(--p))}
+  .cve-live .feed{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+  .cve-live .card{background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:14px 16px;
+    border-left:5px solid var(--tagc,var(--p))}
+  .cve-live .top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:6px}
+  .cve-live .cid{font-family:var(--ft);font-size:20px;letter-spacing:.04em;color:var(--g);text-decoration:none}
+  .cve-live .cid:hover{text-decoration:underline}
+  .cve-live .sev{font-family:var(--ft);font-size:14px;letter-spacing:.06em;color:#160b3a;
+    border-radius:999px;padding:1px 10px;font-weight:700;background:var(--sevc,#999)}
+  .cve-live .date{font-family:var(--ft);font-size:15px;color:var(--dim);margin-left:auto}
+  .cve-live .desc{font-family:var(--fb);font-size:14.6px;line-height:1.6;color:var(--cream);margin:2px 0 10px}
+  .cve-live .map{font-size:13.6px;line-height:1.55;color:var(--cream);
+    background:rgba(110,233,242,.07);border:1px solid rgba(110,233,242,.3);border-radius:10px;padding:8px 11px}
+  .cve-live .map .arrow{font-family:var(--ft);font-size:15px;color:var(--c)}
+  .cve-live .map b{font-family:var(--fd);color:var(--tagc,var(--p));font-weight:700}
+  .cve-live .state{font-family:var(--ft);font-size:18px;color:var(--dim);letter-spacing:.05em;padding:10px 0}
+  .cve-live .state.err{color:var(--r)}
+  .cve-live .foot-note{font-size:12.8px;color:var(--dim);margin:14px 0 0}
+  .cve-live .foot-note a{color:var(--c)}
+  @media (prefers-reduced-motion:no-preference){.cve-live .pulse{animation:cvep 1.2s ease-in-out infinite}
+    @keyframes cvep{0%,100%{opacity:.4}50%{opacity:1}}}
+  </style>
+
+  <span class="eyebrow">Live feed ☾ auto-synced</span>
+  <h2 id="live-cve-h">Recent DNS CVEs, mapped to the course<span class="en">Refreshed daily from NVD · each entry tagged to a defense</span></h2>
+
+  <div class="live-head">
+    <p class="live-intro" style="margin:0;max-width:62ch">Every vulnerability below is a real resolver briefly losing one of the defenses from Part&nbsp;IV. The <b style="color:var(--c)">→ tag</b> on each card says <em>which</em> one, and why it matters at this course's level.</p>
+    <span class="synced" id="cve-synced">syncing…</span>
+  </div>
+
+  <ul class="legend" id="cve-legend"></ul>
+  <ul class="feed" id="cve-feed"><li class="state pulse">Loading live CVE data…</li></ul>
+
+  <p class="foot-note">Source: U.S. NVD (nvd.nist.gov), fetched server-side by a scheduled GitHub Action; the page reads a committed JSON file. CVSS scores occasionally disagree between databases — treat them as indicative and confirm against the vendor advisory before citing. Auto-tags are keyword-based: a starting point for discussion, not an authoritative classification.</p>
+
+  <script>
+  (function(){
+    var BUCKET_COLOR={entropy:"#6ee9f2",bailiwick:"#ffd84d",dnssec:"#ff7ec8",
+                      parser:"#c79bff",dos:"#ff5577",race:"#ff9fd8",general:"#cbb6e8"};
+    var BUCKET_NAME={entropy:"Entropy / PRNG",bailiwick:"Bailiwick",dnssec:"DNSSEC",
+                     parser:"Parsing / memory",dos:"Availability",race:"Forged-reply race",general:"General"};
+    var SEV_COLOR={Critical:"#ff4da6",High:"#ffd84d",Medium:"#6ee9f2",Low:"#9ad",None:"#999","—":"#999"};
+    var esc=function(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;};
+
+    function legend(){
+      var ul=document.getElementById("cve-legend");
+      ul.innerHTML="";
+      Object.keys(BUCKET_NAME).forEach(function(k){
+        var li=document.createElement("li");
+        li.style.setProperty("--tagc",BUCKET_COLOR[k]);
+        li.textContent=BUCKET_NAME[k];
+        ul.appendChild(li);
+      });
+    }
+
+    function card(it){
+      var tag=BUCKET_COLOR[it.bucket]||BUCKET_COLOR.general;
+      var sev=SEV_COLOR[it.severity]||"#999";
+      var score=(it.score||it.score===0)?(" "+it.score):"";
+      return '<li class="card" style="--tagc:'+tag+'">'
+        +'<div class="top">'
+        +'<a class="cid" href="'+esc(it.url)+'" target="_blank" rel="noopener">'+esc(it.id)+'</a>'
+        +'<span class="sev" style="--sevc:'+sev+'">'+esc(it.severity)+score+'</span>'
+        +'<span class="date">'+esc(it.published)+'</span>'
+        +'</div>'
+        +'<div class="desc">'+esc(it.title.replace(/^CVE-\d+-\d+\s—\s/,""))+'</div>'
+        +'<div class="map"><span class="arrow">→ </span><b>'+esc(it.bucket_label)+'</b> — '+esc(it.mapping)+'</div>'
+        +'</li>';
+    }
+
+    function render(data){
+      var feed=document.getElementById("cve-feed");
+      var synced=document.getElementById("cve-synced");
+      var items=(data&&data.items)||[];
+      if(!items.length){ feed.innerHTML='<li class="state">No CVEs in the current window.</li>'; return; }
+      feed.innerHTML=items.map(card).join("");
+      var when=(data.generated||"").replace("T"," ").replace("Z"," UTC");
+      synced.innerHTML='last synced <b>'+esc(when)+'</b>';
+    }
+
+    function fail(msg){
+      document.getElementById("cve-feed").innerHTML='<li class="state err">'+esc(msg)+'</li>';
+      document.getElementById("cve-synced").textContent="feed unavailable";
+    }
+
+    legend();
+    fetch("data/dns-cves.json",{cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(render)
+      .catch(function(e){ fail("Live feed could not load ("+e.message+"). See the static precedents in Part VII."); });
+  })();
+  </script>
+</section>
+<!-- ════════ end LIVE CVE FEED ════════ -->
 
 <!-- ASSESSMENT -->
 <section class="act">
