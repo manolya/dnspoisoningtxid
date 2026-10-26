@@ -392,7 +392,7 @@ a{color:var(--cyan)}
 <!-- ACT I -->
 <section class="act">
   <span class="eyebrow" id="p1">Part I ☾ DNS resolution &amp; trust</span>
-  <h2>Why a forged answer matters<span class="en">Resolvers accept consistency, not authenticity</span></h2>
+  <h2>Why a forged answer matters<span class="en">Resolvers PoV</span></h2>
   <p class="lead">People and programs speak in <strong>names</strong> (<span class="mono">www.bank.example</span>); the network routes by <strong>address</strong>. A <em>recursive resolver</em> walks the DNS tree on your behalf, then <strong>caches</strong> the answer and hands that same cached answer to everyone who asks, for its TTL.</p>
   <p>That caching is the whole prize. Classic DNS has no cryptographic way to ask <span class="q">“who is authorised to assert this record?”</span> A resolver accepts any UDP reply that merely <strong>looks</strong> consistent:</p>
   <ul>
