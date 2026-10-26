@@ -1,0 +1,154 @@
+name: Sync DNS CVE feed
+
+# Refreshes data/dns-cves.json from NVD on a schedule and on demand.
+# The committed JSON is what the page reads (same-origin => no CORS issues).
+# The fetcher is inlined below, so this is the ONLY file you need to add
+# besides data/dns-cves.json.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"      # daily ~06:17 UTC
+  workflow_dispatch: {}        # run manually from the Actions tab
+
+permissions:
+  contents: write              # needed to commit the refreshed JSON
+
+concurrency:
+  group: dns-cve-feed
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch recent DNS CVEs
+        env:
+          # Optional: add repo secret NVD_API_KEY to raise the rate limit.
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          python3 - <<'PY'
+          import datetime as dt, json, os, re, sys, time
+          import urllib.parse, urllib.request
+
+          NVD="https://services.nvd.nist.gov/rest/json/cves/2.0"
+          WINDOW_DAYS=120; MAX_ITEMS=15; OUT="data/dns-cves.json"
+          QUERIES=["BIND DNS","Unbound resolver","dnsmasq","PowerDNS","Knot DNS",
+                   "DNS cache poisoning","DNS resolver","DNS spoofing"]
+          DNS_CONTEXT=re.compile(r"\b(bind9?|unbound|dnsmasq|powerdns|knot|resolver|"
+              r"nameserver|rrset|rrsig|dnssec|dnskey|nsec3?|zone|forwarder|"
+              r"cache\s*poison|name server|dns\b)",re.I)
+          BUCKETS={
+            "entropy":("Part IV · TXID + source-port randomization",
+              "Reply-matching values (transaction ID / source port) were predictable, "
+              "so an off-path attacker can win the race (Part II)."),
+            "bailiwick":("Part IV · Bailiwick checking",
+              "The resolver cached records it was never asked for or that lie outside "
+              "the server's zone — the Kaminsky payload (Part III)."),
+            "dnssec":("Part IV · DNSSEC validation",
+              "A flaw in signing/validation or in its availability cost (a bad "
+              "signature can take a whole zone offline)."),
+            "parser":("Part I–II · DNS message parsing",
+              "A memory-safety bug while parsing DNS messages — the deck's warning "
+              "that 'parsing names correctly is central'."),
+            "dos":("Availability (the A in CIA)",
+              "Resource exhaustion or a crash: this breaks availability, not the "
+              "integrity of answers."),
+            "race":("Part II · The forged-reply race",
+              "Spoofed or forged replies accepted into the cache — the core "
+              "cache-poisoning mechanism."),
+            "general":("DNS integrity",
+              "A DNS trust/integrity issue; read the advisory for the exact mechanism."),
+          }
+          RULES=[
+            ("entropy",re.compile(r"\b(prng|pseudo.?random|predictable|randomi[sz]|"
+              r"transaction id|txid|source port|query id)\b",re.I)),
+            ("bailiwick",re.compile(r"\b(bailiwick|unsolicited|out[- ]of[- ]zone|"
+              r"additional section|authority section|promiscuous|delegation|"
+              r"\bns record|cname)\b",re.I)),
+            ("dnssec",re.compile(r"\b(dnssec|rrsig|dnskey|nsec3?|signature validation|"
+              r"validat\w* .*signature|key rollover)\b",re.I)),
+            ("parser",re.compile(r"\b(buffer overflow|out[- ]of[- ]bounds|"
+              r"use[- ]after[- ]free|heap|stack overflow|assertion|parse|parsing|"
+              r"memory (corruption|safety))\b",re.I)),
+            ("race",re.compile(r"\b(spoof\w*|forged|off[- ]path|on[- ]path|"
+              r"cache poison\w*|inject\w* .*(record|response))\b",re.I)),
+            ("dos",re.compile(r"\b(denial[- ]of[- ]service|\bdos\b|cpu|"
+              r"resource (exhaustion|consumption)|crash|amplification|excessive)\b",re.I)),
+          ]
+          def classify(t):
+            for n,rx in RULES:
+              if rx.search(t):
+                l,m=BUCKETS[n]; return n,l,m
+            l,m=BUCKETS["general"]; return "general",l,m
+          def severity_of(cve):
+            m=cve.get("metrics",{})
+            for k in ("cvssMetricV31","cvssMetricV40","cvssMetricV30"):
+              if m.get(k):
+                d=m[k][0]["cvssData"]; return d.get("baseSeverity","—").title(),d.get("baseScore")
+            if m.get("cvssMetricV2"):
+              d=m["cvssMetricV2"][0]; s=d["cvssData"].get("baseScore")
+              sev=d.get("baseSeverity") or ("High" if s and s>=7 else "Medium" if s and s>=4 else "Low")
+              return str(sev).title(),s
+            return "—",None
+          def english(cve):
+            for d in cve.get("descriptions",[]):
+              if d.get("lang")=="en": return " ".join(d["value"].split())
+            return ""
+          def fetch(q,start,end,key):
+            p=urllib.parse.urlencode({"keywordSearch":q,"pubStartDate":start,
+              "pubEndDate":end,"resultsPerPage":50})
+            req=urllib.request.Request(f"{NVD}?{p}",headers={"User-Agent":"cse425-dns-feed"})
+            if key: req.add_header("apiKey",key)
+            with urllib.request.urlopen(req,timeout=40) as r: return json.load(r)
+
+          key=os.environ.get("NVD_API_KEY","").strip() or None
+          now=dt.datetime.now(dt.timezone.utc)
+          start=(now-dt.timedelta(days=WINDOW_DAYS)).strftime("%Y-%m-%dT00:00:00.000")
+          end=now.strftime("%Y-%m-%dT%H:%M:%S.000")
+          found={}; errors=0
+          for q in QUERIES:
+            try: data=fetch(q,start,end,key)
+            except Exception as e:
+              errors+=1; print(f"[warn] {q!r}: {e}",file=sys.stderr); time.sleep(2); continue
+            for v in data.get("vulnerabilities",[]):
+              cve=v["cve"]; cid=cve["id"]
+              if cid in found: continue
+              desc=english(cve)
+              if not DNS_CONTEXT.search(f"{cid} — {desc}"): continue
+              sev,score=severity_of(cve)
+              b,label,mapping=classify(desc+" "+cid)
+              ref=next((r["url"] for r in cve.get("references",[])),None)
+              found[cid]={"id":cid,"published":cve.get("published","")[:10],
+                "severity":sev,"score":score,
+                "title":(desc[:230]+"…") if len(desc)>230 else desc,
+                "bucket":b,"bucket_label":label,"mapping":mapping,
+                "url":f"https://nvd.nist.gov/vuln/detail/{cid}","ref":ref}
+            time.sleep(6 if not key else 1)
+
+          if not found and errors and os.path.exists(OUT):
+            print("[info] all queries failed; keeping existing data file.",file=sys.stderr); sys.exit(0)
+          items=sorted(found.values(),key=lambda x:x["published"],reverse=True)[:MAX_ITEMS]
+          out={"generated":now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+               "source":"NVD 2.0 (services.nvd.nist.gov)","window_days":WINDOW_DAYS,
+               "query_errors":errors,"count":len(items),"items":items}
+          os.makedirs("data",exist_ok=True)
+          with open(OUT,"w") as f: json.dump(out,f,indent=2,ensure_ascii=False)
+          print(f"[ok] wrote {len(items)} CVEs ({errors} query errors).")
+          PY
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/dns-cves.json
+          if git diff --cached --quiet; then
+            echo "No change in CVE feed."
+          else
+            git commit -m "chore: sync DNS CVE feed [skip ci]"
+            git push
+          fi
