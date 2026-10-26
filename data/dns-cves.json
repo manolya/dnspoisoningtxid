@@ -1,0 +1,105 @@
+{
+  "generated": "2026-10-26T09:00:00Z",
+  "source": "seed snapshot — replaced automatically by the GitHub Action",
+  "window_days": 120,
+  "query_errors": 0,
+  "count": 8,
+  "items": [
+    {
+      "id": "CVE-2026-11605",
+      "published": "2026-07-22",
+      "severity": "High",
+      "score": 7.5,
+      "title": "ISC BIND 9: the DNSSEC validator checks every RRSIG in a response with no short-circuit once one valid signature confirms the RRset, so a zone with many signatures can exhaust resolver CPU (denial of service).",
+      "bucket": "dos",
+      "bucket_label": "Availability (the A in CIA)",
+      "mapping": "Resource exhaustion or a crash: this breaks availability, not the integrity of answers.",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-11605",
+      "ref": "https://kb.isc.org/docs/aa-00913"
+    },
+    {
+      "id": "CVE-2026-33612",
+      "published": "2026-06-25",
+      "severity": "High",
+      "score": 7.5,
+      "title": "PowerDNS Recursor (ZoneToCache): records that fall outside the loaded zone's bailiwick are inserted into the shared cache, letting a malicious or compromised authoritative server poison cached answers for arbitrary names.",
+      "bucket": "bailiwick",
+      "bucket_label": "Part IV · Bailiwick checking",
+      "mapping": "The resolver cached records it was never asked for or that lie outside the server's zone — the Kaminsky payload (Part III).",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-33612",
+      "ref": "https://docs.powerdns.com/recursor/security-advisories/"
+    },
+    {
+      "id": "CVE-2026-45674",
+      "published": "2026-06-12",
+      "severity": "High",
+      "score": 8.7,
+      "title": "Netty netty-resolver-dns: buildAliasMap caches CNAME records without checking the responding server is authoritative for them (missing bailiwick check), allowing an on-path attacker to inject a CNAME that redirects later lookups.",
+      "bucket": "bailiwick",
+      "bucket_label": "Part IV · Bailiwick checking",
+      "mapping": "The resolver cached records it was never asked for or that lie outside the server's zone — the Kaminsky payload (Part III).",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-45674",
+      "ref": "https://github.com/netty/netty/security/advisories"
+    },
+    {
+      "id": "CVE-2026-42960",
+      "published": "2026-05-20",
+      "severity": "Medium",
+      "score": 5.7,
+      "title": "NLnet Labs Unbound: promiscuous RRsets placed in the authority section (e.g. MX with A/AAAA in additional) can be treated as in-zone delegation data and cached, redirecting clients until the poisoned entries expire.",
+      "bucket": "bailiwick",
+      "bucket_label": "Part IV · Bailiwick checking",
+      "mapping": "The resolver cached records it was never asked for or that lie outside the server's zone — the Kaminsky payload (Part III).",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-42960",
+      "ref": "https://nlnetlabs.nl/projects/unbound/security-advisories/"
+    },
+    {
+      "id": "CVE-2026-2291",
+      "published": "2026-05-12",
+      "severity": "High",
+      "score": 7.5,
+      "title": "dnsmasq: a heap buffer overflow in extract_name() can inject false DNS cache entries that redirect queries to attacker-controlled IPs, or crash the service.",
+      "bucket": "parser",
+      "bucket_label": "Part I–II · DNS message parsing",
+      "mapping": "A memory-safety bug while parsing DNS messages — the deck's warning that 'parsing names correctly is central'.",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-2291",
+      "ref": "https://thekelleys.org.uk/dnsmasq/CHANGELOG"
+    },
+    {
+      "id": "CVE-2025-40780",
+      "published": "2025-10-22",
+      "severity": "High",
+      "score": 8.6,
+      "title": "ISC BIND 9: a weakness in the pseudo-random number generator lets an attacker predict source ports and query IDs, making it feasible to inject forged responses into resolver caches.",
+      "bucket": "entropy",
+      "bucket_label": "Part IV · TXID + source-port randomization",
+      "mapping": "Reply-matching values (transaction ID / source port) were predictable, so an off-path attacker can win the race (Part II).",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-40780",
+      "ref": "https://kb.isc.org/docs/cve-2025-40780"
+    },
+    {
+      "id": "CVE-2025-40778",
+      "published": "2025-10-22",
+      "severity": "High",
+      "score": 8.6,
+      "title": "ISC BIND 9: recursive resolvers accept certain unsolicited resource records in responses and cache them, violating bailiwick principles and enabling cache poisoning.",
+      "bucket": "bailiwick",
+      "bucket_label": "Part IV · Bailiwick checking",
+      "mapping": "The resolver cached records it was never asked for or that lie outside the server's zone — the Kaminsky payload (Part III).",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-40778",
+      "ref": "https://kb.isc.org/docs/cve-2025-40778"
+    },
+    {
+      "id": "CVE-2025-11411",
+      "published": "2025-10-22",
+      "severity": "Medium",
+      "score": null,
+      "title": "NLnet Labs Unbound: unsolicited NS records in the authority section were treated as in-zone delegation data and overwrote cached delegation, allowing domain hijacking via spoofed or fragmented replies (non-DNSSEC data).",
+      "bucket": "bailiwick",
+      "bucket_label": "Part IV · Bailiwick checking",
+      "mapping": "The resolver cached records it was never asked for or that lie outside the server's zone — the Kaminsky payload (Part III).",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-11411",
+      "ref": "https://nlnetlabs.nl/projects/unbound/security-advisories/"
+    }
+  ]
+}
