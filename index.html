@@ -411,6 +411,18 @@ a{color:var(--cyan)}
 .bul{margin:8px 0 0;padding:0 0 0 20px;display:flex;flex-direction:column;gap:7px}
 .bul li{font-size:14.3px;line-height:1.55}
 .bul li::marker{color:var(--ruby)}
+
+/* ── top-level section tabs (Lecture / Assignment) ───────────────────── */
+.nav-top{list-style:none;margin:6px 0 20px;padding:0;display:flex;gap:6px;border-bottom:2px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);background:var(--space);z-index:15}
+.nav-top li button{font-family:var(--f-disp);font-weight:800;font-size:15.5px;letter-spacing:.01em;padding:11px 20px;border:2px solid transparent;border-bottom:none;border-radius:12px 12px 0 0;background:transparent;color:var(--cream-dim);cursor:pointer;margin-bottom:-2px}
+.nav-top li button:hover{color:#fff;background:rgba(255,255,255,.05)}
+.nav-top li button[aria-selected="true"]{color:var(--gold);background:var(--space2);border-color:var(--line) var(--line) var(--space2)}
+.doc-head{border-bottom:2px solid var(--line);padding:4px 0 16px;margin:0 0 18px}
+.doc-head .course-line{font-family:var(--f-term);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.doc-head .doc-title{margin:8px 0 10px}
+.fillbar{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:12px;font-family:var(--f-term);font-size:13.6px;color:var(--cream-dim)}
+.fillbar span b{color:var(--cyan);margin-right:7px;font-weight:700}
+.fillbar .blank{border-bottom:1px solid var(--line);display:inline-block;min-width:160px}
 </style>
 
 <div class="wrap">
@@ -428,19 +440,13 @@ a{color:var(--cyan)}
   <ul class="chips"><li>Lecture</li><li>4 interactive tools</li><li>4 CVE case studies</li><li>Sandbox lab</li></ul>
 </header>
 
-<!-- ASSIGNMENT LINK — pinned at top.
-     INSTRUCTOR: set the submission URL in BOTH href="..." placeholders below and in the brief box. -->
-<div class="asn-top">
-  <div class="at-l">
-    <div class="at-k">★ Graded assignment · A1 · due in your voice</div>
-    <div class="at-t">Reproduce &amp; defend a 2024–2025 resolver CVE</div>
-    <div class="at-s">Disposable Docker lab · threat-model tree · a 10-minute screen recording narrated in your own voice. Full step-by-step brief below.</div>
-  </div>
-  <div class="asn-cta">
-    <a class="btn" href="https://REPLACE-WITH-YOUR-SUBMISSION-LINK" target="_blank" rel="noopener">▶ Submit your 10-min video</a>
-    <a class="btn ghost" href="#assignment">Read the brief ▾</a>
-  </div>
-</div>
+<!-- top-level section tabs -->
+<ul class="nav-top" role="tablist" aria-label="Section">
+  <li role="presentation"><button role="tab" id="top-lecture" data-token="lecture" aria-selected="true" aria-controls="view-lecture">☄ Lecture</button></li>
+  <li role="presentation"><button role="tab" id="top-assignment" data-token="assignment" aria-selected="false" aria-controls="view-assignment">★ Assignment</button></li>
+</ul>
+
+<div id="view-lecture" role="tabpanel" aria-labelledby="top-lecture">
 
 <!-- TOC -->
 <nav class="act toc" aria-label="Contents">
@@ -456,150 +462,12 @@ a{color:var(--cyan)}
     <li><a href="#p8"><span class="n">VIII</span><span class="tt"><b>Assessment &amp; sources</b><span>hand-in + precedents</span></span></a></li>
   </ol>
   <div class="toctools">
-    <a href="#assignment" style="color:var(--gold);border-color:var(--gold)">★ Assignment A1 (video)</a>
     <a href="#tool-packet">Packet inspector</a>
     <a href="#tool-race">Race simulator</a>
     <a href="#tool-dnssec">DNSSEC explorer</a>
     <a href="#tool-drill">Investigation drill</a>
   </div>
 </nav>
-
-<!-- ASSIGNMENT A1 -->
-<section class="act" id="assignment">
-  <span class="eyebrow">★ Assignment A1 ☾ Reproduce &amp; defend</span>
-  <h2>Test a 2024–2025 resolver CVE in a throwaway lab<span class="en">Attack it, map it, defend it — then explain it on camera</span></h2>
-  <p class="lead">In your <strong>disposable Docker sandbox</strong> (the Part VI lab, <span class="mono">CSE425_dns_poisoning_lab.zip</span>), pick one recent resolver CVE, reproduce the <em>class</em> of flaw it represents against a deliberately weak resolver, then switch on the defense that closes it. You hand in a <strong>10-minute screen recording narrated in your own voice</strong>. The upload link is pinned at the very top of this page.</p>
-
-  <div class="note guard"><span class="lab-l">Deliverable · at a glance</span>
-    <p>One <strong>MP4, ≤ 10 minutes</strong>, your own voice over a live screen capture of the lab. Pairs of two. Submit through the link at the top of the page. File name: <span class="mono">A1_&lt;surname&gt;_&lt;CVE&gt;.mp4</span>. No faces required — voice + terminal is enough.</p></div>
-
-  <div class="note danger"><span class="lab-l">⚠ Ethics &amp; safety — read before you open a shell</span>
-    <p>This exercise only teaches defense. Keep it inside the box:</p>
-    <ul class="bul">
-      <li><strong>Disposable VM only.</strong> Run the lab in a throwaway virtual machine (or a dev container you will delete). Snapshot before, destroy after. Never on your daily OS.</li>
-      <li><strong>Isolated network.</strong> The Docker network is <span class="mono">internal: true</span> — no route to the internet, your campus LAN, or any real resolver. Do not add one.</li>
-      <li><strong>Fabricated data only.</strong> The only zone is the invented <span class="mono">bank.lab</span>. Never point any tool at a domain, IP, or resolver you do not own.</li>
-      <li><strong>Authorised targets only.</strong> Off-path spoofing, ARP tricks, or cache poisoning against systems you do not own is a crime in most jurisdictions (in Türkiye, TCK Art. 243–244). The lab is your only legal target.</li>
-      <li><strong>Your own work &amp; voice.</strong> The narration must be you explaining your run. No AI-generated voice, no reused recordings.</li>
-      <li><strong>Tear down.</strong> End with <span class="mono">docker compose down -v</span> and delete the VM/snapshot. Show it in the video.</li>
-    </ul></div>
-
-  <h3>1 · Choose your target (2024–2025)</h3>
-  <p>The walkthrough below uses <span class="mono">CVE-2025-40778</span> as the primary target. Your pair may instead take one approved alternative — <strong>each pair picks a different leaf of the tree</strong>, so neighbouring groups don't submit the same run:</p>
-  <div class="tbl-scroll"><table class="matrix">
-    <tr><th>Pick</th><th>Software</th><th>Flaw class</th><th>Tree leaf / defense</th><th>Disclosed</th></tr>
-    <tr><td><span class="mono">CVE-2025-40778</span> <em>(default)</em></td><td>BIND 9</td><td>Lenient answer acceptance → off-path poisoning</td><td>Accept branch · <strong>Defense 2</strong></td><td>Oct 2025</td></tr>
-    <tr><td><span class="mono">CVE-2025-40780</span></td><td>BIND 9</td><td>Weak PRNG → predictable port/TXID</td><td>Match branch · <strong>Defense 1</strong></td><td>Oct 2025</td></tr>
-    <tr><td><span class="mono">CVE-2025-11411</span></td><td>Unbound</td><td>Unsolicited in-zone NS accepted</td><td>Accept branch · <strong>Defense 2</strong></td><td>Nov 2025</td></tr>
-    <tr><td><span class="mono">CVE-2023-50387</span> “KeyTrap”</td><td>Validators (BIND/Unbound/…)</td><td>DNSSEC validation complexity → CPU exhaustion DoS</td><td><strong>Gate itself</strong> · availability</td><td>Feb 2024</td></tr>
-  </table></div>
-  <p class="hint">KeyTrap is the interesting outlier: it attacks the <em>DNSSEC gate</em> rather than a leaf — the defense becomes the denial-of-service vector. Pick it if your pair wants the availability angle instead of poisoning.</p>
-
-  <h3>2 · Threat model — the tree you must defend</h3>
-  <p>Read it top-down, exactly like Part VII's tree. The goal needs <em>all three</em> AND-branches to hold; your chosen CVE is the highlighted <strong>leaf</strong>. In the video you will walk this tree and say which branch your attack satisfied and which defense cut it.</p>
-  <div class="tree">
-    <ul>
-      <li><span class="node goal"><span class="lbl">GOAL — forged record cached by the victim's resolver</span></span>
-        <ul>
-          <li><div class="androw"><span class="node op">AND ①</span><span class="node"><span class="lbl">Reply matches the outstanding query</span><span class="sub">src IP · port · TXID · question</span></span></div>
-            <ul>
-              <li><span class="node or1"><span class="lbl">Predict port/TXID via weak PRNG</span> <span class="cvetag ct1">CVE-2025-40780</span></span></li>
-              <li><span class="node or1"><span class="lbl">Flood the ~2³² space (lab shortcut: tiny space)</span><span class="sub">Defense 1 territory</span></span></li>
-            </ul>
-          </li>
-          <li><div class="androw"><span class="node op">AND ②</span><span class="node"><span class="lbl">Forged reply wins the race</span><span class="sub">repeat with fresh random-subdomain queries</span></span></div></li>
-          <li><div class="androw"><span class="node op">AND ③</span><span class="node"><span class="lbl">Resolver accepts the record</span><span class="sub">credibility / bailiwick checks too loose</span></span></div>
-            <ul>
-              <li><span class="node or2"><span class="lbl">Lenient answer acceptance</span> <span class="cvetag ct2">CVE-2025-40778</span></span></li>
-              <li><span class="node or2"><span class="lbl">Unsolicited in-zone NS</span> <span class="cvetag ct2">CVE-2025-11411</span></span></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-    </ul>
-    <div class="gatewrap"><span class="arr">▼</span><span class="node gate"><span class="lbl">🌙 GATE — DNSSEC validation</span><span class="sub">signed zone → forged RRset is Bogus → blocked · (KeyTrap attacks this gate itself)</span></span></div>
-    <div class="treelegend">
-      <span><span class="sw" style="border-color:var(--cyan)"></span> Defense 1 — randomization closes the match branch</span>
-      <span><span class="sw" style="border-color:var(--violet)"></span> Defense 2 — bailiwick/credibility closes the accept branch</span>
-      <span><span class="sw" style="border-color:var(--gold)"></span> Defense 3 — DNSSEC cuts the tree (and is KeyTrap's target)</span>
-    </div>
-  </div>
-
-  <h3>3 · Build the disposable lab</h3>
-  <p>Inside your throwaway VM, unzip the Part VI scaffold. Its <span class="mono">docker-compose.yml</span> defines four roles on one <strong>internal</strong> bridge: <span class="mono">authsrv</span> (authoritative for <span class="mono">bank.lab</span>), <span class="mono">resolver</span> (the victim cache, with a <span class="mono">MODE=vuln|patched</span> switch), <span class="mono">attacker</span>, and <span class="mono">client</span>.</p>
-  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">vm ~ throwaway</span></div>
-<pre><span class="cm"># inside the disposable VM only</span>
-unzip CSE425_dns_poisoning_lab.zip -d a1 &amp;&amp; cd a1
-<span class="cm"># confirm the network is sealed off — you should see "internal: true"</span>
-grep -n internal docker-compose.yml
-MODE=vuln docker compose up -d
-docker compose ps</pre></div>
-
-  <h3>4 · Baseline — prove it resolves correctly</h3>
-  <p>Before attacking, show the resolver returning the <em>true</em> answer from <span class="mono">authsrv</span>.</p>
-  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">client</span></div>
-<pre>docker compose exec client dig +short bank.lab @resolver
-<span class="ok"># → 10.80.0.10  (the real authsrv address)</span></pre></div>
-
-  <h3>5 · Run the attack (vulnerable config)</h3>
-  <p>Launch the off-path injector, then re-query. On <span class="mono">MODE=vuln</span> the forged record is accepted and cached.</p>
-  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">attacker</span></div>
-<pre><span class="cm"># flags documented in the lab README — e.g. off-path forged-answer flood</span>
-docker compose exec attacker python attacker.py --target resolver --zone bank.lab --mode off-path
-<span class="cm"># then, from the client:</span>
-docker compose exec client dig +short bank.lab @resolver
-<span class="pr"># → 10.66.6.66  ← attacker's address: the cache is poisoned</span></pre></div>
-  <div class="step fail"><span class="mk"></span><div class="sx"><span class="st">Checkpoint</span><span class="sd">Capture a packet trace of the winning forged reply — <span class="mono">docker compose exec resolver tcpdump -w /tmp/poison.pcap udp port 53</span>. You will show this frame in the video.</span></div></div>
-
-  <h3>6 · Map what you saw to the CVE</h3>
-  <p>Open the advisory for your chosen CVE and line up its root cause with the exact step your lab performed. For <span class="mono">CVE-2025-40778</span>: which record in the forged reply was <em>unsolicited / out-of-bailiwick</em>, and which acceptance check the patched version adds. Put a one-sentence mapping on screen.</p>
-
-  <h3>7 · Switch on the defense &amp; re-test</h3>
-  <p>Rebuild in <span class="mono">patched</span> mode (or enable the matching guardian), repeat the identical attack, and show it failing. Same command, opposite result — that contrast is the heart of the assignment.</p>
-  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">vm ~ a1</span></div>
-<pre>docker compose down &amp;&amp; MODE=patched docker compose up -d
-docker compose exec attacker python attacker.py --target resolver --zone bank.lab --mode off-path
-docker compose exec client dig +short bank.lab @resolver
-<span class="ok"># → 10.80.0.10  ← real answer; forged record rejected</span></pre></div>
-  <div class="step pass"><span class="mk"></span><div class="sx"><span class="st">Checkpoint</span><span class="sd">If you chose the DNSSEC track, show the forged RRset returning <span class="mono">SERVFAIL</span> (Bogus) instead. If you chose KeyTrap, show resolver CPU spiking under crafted signed responses — the opposite lesson.</span></div></div>
-
-  <h3>8 · Capture evidence, then destroy the lab</h3>
-  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">vm ~ a1</span></div>
-<pre>docker compose down -v        <span class="cm"># remove containers + the sealed network</span>
-<span class="cm"># then delete the VM / revert the snapshot — show this on camera</span></pre></div>
-
-  <h3>9 · Record the 10-minute video</h3>
-  <p>Screen capture (OBS, QuickTime, <span class="mono">asciinema</span> + talk-over — any tool) with your own voice. Keep it under 10 minutes. Suggested clock:</p>
-  <div class="vclock">
-    <span><b>0:00–1:00</b> who you are · which CVE · the tree</span>
-    <span><b>1:00–5:30</b> live attack on the vulnerable resolver</span>
-    <span><b>5:30–8:30</b> defense on · re-test · the contrast</span>
-    <span><b>8:30–10:00</b> answer the questions · teardown</span>
-  </div>
-
-  <h3>Questions to answer aloud in the video</h3>
-  <p>Weave these into the narration — don't just read them. Every pair answers all seven.</p>
-  <ol class="vidq">
-    <li><b>Place your CVE on the tree.</b> Which AND-branches did your attack satisfy, and on which leaf (or the gate) does your CVE sit?</li>
-    <li><b>Which single defense closes your leaf, and why does it not close the others?</b> Name the guardian and the check it adds.</li>
-    <li><b>Show the moment of acceptance.</b> Point at the forged/unsolicited record in your capture and say which validation the vulnerable resolver skipped.</li>
-    <li><b>Do the entropy arithmetic.</b> With port + TXID randomization on, estimate a blind attacker's per-reply success probability; explain how your lab shortened that race.</li>
-    <li><b>Would DNSSEC have stopped you?</b> Argue yes/no for your CVE — and if you chose KeyTrap, explain the twist that DNSSEC is the attack surface.</li>
-    <li><b>Patched vs unpatched.</b> Narrate the behavioural difference you demonstrated after turning the defense on.</li>
-    <li><b>Ethics &amp; blast radius.</b> Name the three things that kept your lab safe, and state one action that would be illegal if done outside it.</li>
-  </ol>
-
-  <h3>Grading</h3>
-  <div class="tbl-scroll"><table class="rubric">
-    <tr><th>Criterion</th><th>What we look for</th><th>Weight</th></tr>
-    <tr><td>Working reproduction</td><td>Poisoning succeeds on <span class="mono">vuln</span>, fails on <span class="mono">patched</span>, shown live</td><td>30%</td></tr>
-    <tr><td>Threat-model mapping</td><td>Correct leaf/branch placement; right defense identified</td><td>25%</td></tr>
-    <tr><td>Questions answered</td><td>All seven, in your own words, technically correct</td><td>25%</td></tr>
-    <tr><td>Explanation &amp; voice</td><td>Clear narration, your own voice, within 10 min</td><td>10%</td></tr>
-    <tr><td>Ethics &amp; teardown</td><td>Constraints respected; lab destroyed on camera</td><td>10%</td></tr>
-  </table></div>
-  <p class="hint">Submit via the link pinned at the top of this page. <strong>Instructor:</strong> set that URL before sharing the page.</p>
-</section>
 
 <!-- ACT I -->
 <section class="act">
@@ -1089,6 +957,154 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
   <p class="hint">Note the pairing: CVE-2025-11411 is <em>unsolicited in-zone</em> data, while CVE-2026-45674 is <em>genuinely out-of-bailiwick</em> — a useful distinction for the bailiwick reflection question.</p>
 </section>
 
+</div><!-- /view-lecture -->
+
+<div id="view-assignment" role="tabpanel" aria-labelledby="top-assignment" hidden>
+<!-- ASSIGNMENT A1 -->
+<section class="act" id="assignment">
+  <div class="doc-head">
+    <div class="course-line">CSE425 ✦ Network Security — Lab Assignment</div>
+    <h2 class="doc-title">Assignment A1 ☾ Reproduce &amp; defend a 2024–2025 resolver CVE</h2>
+    <p class="lead">Pick one recent resolver CVE, reproduce the <em>class</em> of flaw it represents in your disposable Docker sandbox, then switch on the defense that closes it — and record a short video in which <strong>you narrate what you are doing and answer the questions below on camera</strong>. The questions are deliberately not answerable by reading alone; only by having run the lab.</p>
+    <div class="fillbar">
+      <span><b>Due</b> <span class="blank">&nbsp;</span></span>
+      <span><b>Submit to</b> MS Teams · Class Assignment</span>
+      <span><b>Mode</b> Pairs of two</span>
+    </div>
+  </div>
+
+  <div class="note guard"><span class="lab-l">Deliverable · at a glance</span>
+    <p>One <strong>MP4, ≤ 10 minutes</strong>, your own voice over a live screen capture of the lab, handed in through <strong>MS Teams → Class Assignment</strong>. File name: <span class="mono">A1_&lt;surname&gt;_&lt;CVE&gt;.mp4</span>. Webcam optional — voice + terminal is enough.</p></div>
+
+  <div class="note danger"><span class="lab-l">⚠ Ethics &amp; safety — read before you open a shell</span>
+    <p>This exercise only teaches defense. Keep it inside the box:</p>
+    <ul class="bul">
+      <li><strong>Disposable VM only.</strong> Run the lab in a throwaway virtual machine (or a dev container you will delete). Snapshot before, destroy after. Never on your daily OS.</li>
+      <li><strong>Isolated network.</strong> The Docker network is <span class="mono">internal: true</span> — no route to the internet, your campus LAN, or any real resolver. Do not add one.</li>
+      <li><strong>Fabricated data only.</strong> The only zone is the invented <span class="mono">bank.lab</span>. Never point any tool at a domain, IP, or resolver you do not own.</li>
+      <li><strong>Authorised targets only.</strong> Off-path spoofing, ARP tricks, or cache poisoning against systems you do not own is a crime in most jurisdictions (in Türkiye, TCK Art. 243–244). The lab is your only legal target.</li>
+      <li><strong>Your own work &amp; voice.</strong> The narration must be you explaining your run. No AI-generated voice, no reused recordings.</li>
+      <li><strong>Tear down.</strong> End with <span class="mono">docker compose down -v</span> and delete the VM/snapshot. Show it in the video.</li>
+    </ul></div>
+
+  <h3>1 · Choose your target (2024–2025)</h3>
+  <p>The walkthrough below uses <span class="mono">CVE-2025-40778</span> as the primary target. Your pair may instead take one approved alternative — <strong>each pair picks a different leaf of the tree</strong>, so neighbouring groups don't submit the same run:</p>
+  <div class="tbl-scroll"><table class="matrix">
+    <tr><th>Pick</th><th>Software</th><th>Flaw class</th><th>Tree leaf / defense</th><th>Disclosed</th></tr>
+    <tr><td><span class="mono">CVE-2025-40778</span> <em>(default)</em></td><td>BIND 9</td><td>Lenient answer acceptance → off-path poisoning</td><td>Accept branch · <strong>Defense 2</strong></td><td>Oct 2025</td></tr>
+    <tr><td><span class="mono">CVE-2025-40780</span></td><td>BIND 9</td><td>Weak PRNG → predictable port/TXID</td><td>Match branch · <strong>Defense 1</strong></td><td>Oct 2025</td></tr>
+    <tr><td><span class="mono">CVE-2025-11411</span></td><td>Unbound</td><td>Unsolicited in-zone NS accepted</td><td>Accept branch · <strong>Defense 2</strong></td><td>Nov 2025</td></tr>
+    <tr><td><span class="mono">CVE-2023-50387</span> “KeyTrap”</td><td>Validators (BIND/Unbound/…)</td><td>DNSSEC validation complexity → CPU exhaustion DoS</td><td><strong>Gate itself</strong> · availability</td><td>Feb 2024</td></tr>
+  </table></div>
+  <p class="hint">KeyTrap is the interesting outlier: it attacks the <em>DNSSEC gate</em> rather than a leaf — the defense becomes the denial-of-service vector. Pick it if your pair wants the availability angle instead of poisoning.</p>
+
+  <h3>2 · Threat model — the tree you must defend</h3>
+  <p>Read it top-down, exactly like Part VII's tree. The goal needs <em>all three</em> AND-branches to hold; your chosen CVE is the highlighted <strong>leaf</strong>. In the video you will walk this tree and say which branch your attack satisfied and which defense cut it.</p>
+  <div class="tree">
+    <ul>
+      <li><span class="node goal"><span class="lbl">GOAL — forged record cached by the victim's resolver</span></span>
+        <ul>
+          <li><div class="androw"><span class="node op">AND ①</span><span class="node"><span class="lbl">Reply matches the outstanding query</span><span class="sub">src IP · port · TXID · question</span></span></div>
+            <ul>
+              <li><span class="node or1"><span class="lbl">Predict port/TXID via weak PRNG</span> <span class="cvetag ct1">CVE-2025-40780</span></span></li>
+              <li><span class="node or1"><span class="lbl">Flood the ~2³² space (lab shortcut: tiny space)</span><span class="sub">Defense 1 territory</span></span></li>
+            </ul>
+          </li>
+          <li><div class="androw"><span class="node op">AND ②</span><span class="node"><span class="lbl">Forged reply wins the race</span><span class="sub">repeat with fresh random-subdomain queries</span></span></div></li>
+          <li><div class="androw"><span class="node op">AND ③</span><span class="node"><span class="lbl">Resolver accepts the record</span><span class="sub">credibility / bailiwick checks too loose</span></span></div>
+            <ul>
+              <li><span class="node or2"><span class="lbl">Lenient answer acceptance</span> <span class="cvetag ct2">CVE-2025-40778</span></span></li>
+              <li><span class="node or2"><span class="lbl">Unsolicited in-zone NS</span> <span class="cvetag ct2">CVE-2025-11411</span></span></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <div class="gatewrap"><span class="arr">▼</span><span class="node gate"><span class="lbl">🌙 GATE — DNSSEC validation</span><span class="sub">signed zone → forged RRset is Bogus → blocked · (KeyTrap attacks this gate itself)</span></span></div>
+    <div class="treelegend">
+      <span><span class="sw" style="border-color:var(--cyan)"></span> Defense 1 — randomization closes the match branch</span>
+      <span><span class="sw" style="border-color:var(--violet)"></span> Defense 2 — bailiwick/credibility closes the accept branch</span>
+      <span><span class="sw" style="border-color:var(--gold)"></span> Defense 3 — DNSSEC cuts the tree (and is KeyTrap's target)</span>
+    </div>
+  </div>
+
+  <h3>3 · Build the disposable lab</h3>
+  <p>Inside your throwaway VM, unzip the Part VI scaffold. Its <span class="mono">docker-compose.yml</span> defines four roles on one <strong>internal</strong> bridge: <span class="mono">authsrv</span> (authoritative for <span class="mono">bank.lab</span>), <span class="mono">resolver</span> (the victim cache, with a <span class="mono">MODE=vuln|patched</span> switch), <span class="mono">attacker</span>, and <span class="mono">client</span>.</p>
+  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">vm ~ throwaway</span></div>
+<pre><span class="cm"># inside the disposable VM only</span>
+unzip CSE425_dns_poisoning_lab.zip -d a1 &amp;&amp; cd a1
+<span class="cm"># confirm the network is sealed off — you should see "internal: true"</span>
+grep -n internal docker-compose.yml
+MODE=vuln docker compose up -d
+docker compose ps</pre></div>
+
+  <h3>4 · Baseline — prove it resolves correctly</h3>
+  <p>Before attacking, show the resolver returning the <em>true</em> answer from <span class="mono">authsrv</span>.</p>
+  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">client</span></div>
+<pre>docker compose exec client dig +short bank.lab @resolver
+<span class="ok"># → 10.80.0.10  (the real authsrv address)</span></pre></div>
+
+  <h3>5 · Run the attack (vulnerable config)</h3>
+  <p>Launch the off-path injector, then re-query. On <span class="mono">MODE=vuln</span> the forged record is accepted and cached.</p>
+  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">attacker</span></div>
+<pre><span class="cm"># flags documented in the lab README — e.g. off-path forged-answer flood</span>
+docker compose exec attacker python attacker.py --target resolver --zone bank.lab --mode off-path
+<span class="cm"># then, from the client:</span>
+docker compose exec client dig +short bank.lab @resolver
+<span class="pr"># → 10.66.6.66  ← attacker's address: the cache is poisoned</span></pre></div>
+  <div class="step fail"><span class="mk"></span><div class="sx"><span class="st">Checkpoint</span><span class="sd">Capture a packet trace of the winning forged reply — <span class="mono">docker compose exec resolver tcpdump -w /tmp/poison.pcap udp port 53</span>. You will show this frame in the video.</span></div></div>
+
+  <h3>6 · Map what you saw to the CVE</h3>
+  <p>Open the advisory for your chosen CVE and line up its root cause with the exact step your lab performed. For <span class="mono">CVE-2025-40778</span>: which record in the forged reply was <em>unsolicited / out-of-bailiwick</em>, and which acceptance check the patched version adds. Put a one-sentence mapping on screen.</p>
+
+  <h3>7 · Switch on the defense &amp; re-test</h3>
+  <p>Rebuild in <span class="mono">patched</span> mode (or enable the matching guardian), repeat the identical attack, and show it failing. Same command, opposite result — that contrast is the heart of the assignment.</p>
+  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">vm ~ a1</span></div>
+<pre>docker compose down &amp;&amp; MODE=patched docker compose up -d
+docker compose exec attacker python attacker.py --target resolver --zone bank.lab --mode off-path
+docker compose exec client dig +short bank.lab @resolver
+<span class="ok"># → 10.80.0.10  ← real answer; forged record rejected</span></pre></div>
+  <div class="step pass"><span class="mk"></span><div class="sx"><span class="st">Checkpoint</span><span class="sd">If you chose the DNSSEC track, show the forged RRset returning <span class="mono">SERVFAIL</span> (Bogus) instead. If you chose KeyTrap, show resolver CPU spiking under crafted signed responses — the opposite lesson.</span></div></div>
+
+  <h3>8 · Capture evidence, then destroy the lab</h3>
+  <div class="term"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">vm ~ a1</span></div>
+<pre>docker compose down -v        <span class="cm"># remove containers + the sealed network</span>
+<span class="cm"># then delete the VM / revert the snapshot — show this on camera</span></pre></div>
+
+  <h3>9 · Record the 10-minute video</h3>
+  <p>Screen capture (OBS, QuickTime, <span class="mono">asciinema</span> + talk-over — any tool) with your own voice. Keep it under 10 minutes. Suggested clock:</p>
+  <div class="vclock">
+    <span><b>0:00–1:00</b> who you are · which CVE · the tree</span>
+    <span><b>1:00–5:30</b> live attack on the vulnerable resolver</span>
+    <span><b>5:30–8:30</b> defense on · re-test · the contrast</span>
+    <span><b>8:30–10:00</b> answer the questions · teardown</span>
+  </div>
+
+  <h3>Questions to answer aloud in the video</h3>
+  <p>Weave these into the narration — don't just read them. Every pair answers all seven.</p>
+  <ol class="vidq">
+    <li><b>Place your CVE on the tree.</b> Which AND-branches did your attack satisfy, and on which leaf (or the gate) does your CVE sit?</li>
+    <li><b>Which single defense closes your leaf, and why does it not close the others?</b> Name the guardian and the check it adds.</li>
+    <li><b>Show the moment of acceptance.</b> Point at the forged/unsolicited record in your capture and say which validation the vulnerable resolver skipped.</li>
+    <li><b>Do the entropy arithmetic.</b> With port + TXID randomization on, estimate a blind attacker's per-reply success probability; explain how your lab shortened that race.</li>
+    <li><b>Would DNSSEC have stopped you?</b> Argue yes/no for your CVE — and if you chose KeyTrap, explain the twist that DNSSEC is the attack surface.</li>
+    <li><b>Patched vs unpatched.</b> Narrate the behavioural difference you demonstrated after turning the defense on.</li>
+    <li><b>Ethics &amp; blast radius.</b> Name the three things that kept your lab safe, and state one action that would be illegal if done outside it.</li>
+  </ol>
+
+  <h3>Grading</h3>
+  <div class="tbl-scroll"><table class="rubric">
+    <tr><th>Criterion</th><th>What we look for</th><th>Weight</th></tr>
+    <tr><td>Working reproduction</td><td>Poisoning succeeds on <span class="mono">vuln</span>, fails on <span class="mono">patched</span>, shown live</td><td>30%</td></tr>
+    <tr><td>Threat-model mapping</td><td>Correct leaf/branch placement; right defense identified</td><td>25%</td></tr>
+    <tr><td>Questions answered</td><td>All seven, in your own words, technically correct</td><td>25%</td></tr>
+    <tr><td>Explanation &amp; voice</td><td>Clear narration, your own voice, within 10 min</td><td>10%</td></tr>
+    <tr><td>Ethics &amp; teardown</td><td>Constraints respected; lab destroyed on camera</td><td>10%</td></tr>
+  </table></div>
+  <p class="hint">Submit via <strong>MS Teams → Class Assignment</strong> before the due date in the header. <strong>Instructor:</strong> set that due date before sharing.</p>
+</section>
+</div><!-- /view-assignment -->
+
 <footer>
   <div class="moon">☾</div>
   <p>CSE425 Network Security · Akdeniz University · Dr. Manolya Atalay<br>
@@ -1391,5 +1407,31 @@ P ≈ q / N                  <span class="cm"># good approximation only while q 
     else { render([]); setStatus("feed unavailable",true);
       setMeta("none","","commit data/dns-cves.json to enable"); }
   });
+})();
+
+/* ── top-level Lecture / Assignment tabs ──────────────────────────────── */
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.nav-top [role="tab"]'));
+  if(!tabs.length) return;
+  function show(token){
+    tabs.forEach(function(t){
+      var sel=t.getAttribute('data-token')===token;
+      t.setAttribute('aria-selected',sel?'true':'false');
+      var panel=document.getElementById(t.getAttribute('aria-controls'));
+      if(panel) panel.hidden=!sel;
+    });
+  }
+  tabs.forEach(function(t){
+    t.addEventListener('click',function(){
+      var token=t.getAttribute('data-token');
+      show(token);
+      try{ history.replaceState(null,'',token==='assignment'?'#assignment':location.pathname+location.search); }catch(e){}
+      window.scrollTo(0,0);
+    });
+  });
+  window.addEventListener('hashchange',function(){
+    if(location.hash==='#assignment'){ show('assignment'); window.scrollTo(0,0); }
+  });
+  show(location.hash==='#assignment'?'assignment':'lecture');
 })();
 </script>
